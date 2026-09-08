@@ -1,0 +1,492 @@
+<title>StoryCraft Blueprint</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --paper:#F1F2F5; --surface:#FFFFFF; --surface-2:#F7F8FA; --ink:#14161A; --muted:#5B6169;
+  --line:#DCDFE4; --warn:#8A4B06; --warn-soft:#FDF3E7; --warn-line:#E7C79A;
+  --pass-soft:#E8F6F4; --pass-ink:#0B7B70; --pass-line:#9AD6CF;
+  --brand:#E20074; --code-bg:#EDEFF2; --shadow:0 20px 44px rgba(20,22,26,.12);
+  --font-sans:'IBM Plex Sans',"Segoe UI",Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --font-slide:"TeleNeo Office","TeleNeo","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#15171B; --surface:#1C1F25; --surface-2:#22262D; --ink:#F1F2F4; --muted:#9BA1AC;
+    --line:#2C3038; --warn:#F0A742; --warn-soft:#2E2313; --warn-line:#6B4C1E;
+    --pass-soft:#0F2723; --pass-ink:#54D6C6; --pass-line:#1F4F49;
+    --brand:#FF4B9E; --code-bg:#22262D; --shadow:0 20px 44px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#15171B; --surface:#1C1F25; --surface-2:#22262D; --ink:#F1F2F4; --muted:#9BA1AC;
+  --line:#2C3038; --warn:#F0A742; --warn-soft:#2E2313; --warn-line:#6B4C1E;
+  --pass-soft:#0F2723; --pass-ink:#54D6C6; --pass-line:#1F4F49;
+  --brand:#FF4B9E; --code-bg:#22262D; --shadow:0 20px 44px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-sans)}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+.mono{font-family:var(--font-mono)}
+.tnum{font-variant-numeric:tabular-nums}
+.page{max-width:1240px;margin:0 auto;padding:34px 24px 56px}
+
+.masthead{display:flex;flex-direction:column;gap:9px;padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--brand);font-weight:600}
+.masthead h1{font-size:clamp(23px,3vw,31px);font-weight:700;line-height:1.15;max-width:22ch}
+.masthead .lede{font-size:14.5px;line-height:1.55;color:var(--muted);max-width:74ch}
+
+.masterbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:16px}
+.masterbar .dot{width:9px;height:9px;border-radius:50%;background:var(--pass-ink);flex:none}
+.masterbar .info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.masterbar .info b{font-size:13px;font-weight:700}
+.masterbar .info span{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.masterbar .spacer{flex:1}
+.filebtn{font-family:var(--font-sans);font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer}
+.filebtn input{display:none}
+
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.tpl-group{display:flex;gap:6px;flex-wrap:wrap}
+.tpl-btn{font-family:var(--font-sans);font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:100px;padding:7px 13px;cursor:pointer}
+.tpl-btn.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.sel{font-family:var(--font-sans);font-size:12.5px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 10px;max-width:220px}
+.spacer{flex:1}
+.toggle{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none}
+.toggle input{accent-color:var(--brand)}
+.field-label{font-family:var(--font-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+
+.workbench-grid{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+@media(max-width:900px){.workbench-grid{grid-template-columns:1fr}}
+.slide-frame{position:relative;width:100%;aspect-ratio:13.3333/7.5;background:#fff;border-radius:8px;overflow:hidden;box-shadow:var(--shadow)}
+.obj{position:absolute;font-family:var(--font-slide);white-space:pre-wrap;overflow:hidden}
+.obj.icon-obj svg{width:100%;height:100%;display:block}
+.grid-overlay{position:absolute;inset:0;pointer-events:none;display:none}
+.grid-overlay.show{display:block}
+.grid-overlay .col{position:absolute;top:0;bottom:0;background:rgba(226,0,116,.05);border-left:1px dashed rgba(120,120,130,.35);border-right:1px dashed rgba(120,120,130,.35)}
+.grid-overlay .safe{position:absolute;border:1.5px dashed rgba(20,22,26,.4)}
+.grid-overlay .zone{position:absolute;border:1px dashed rgba(226,0,116,.55)}
+.frame-note{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);margin-top:7px}
+
+.side-panel{display:flex;flex-direction:column;gap:14px}
+.panel-block{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.panel-block h4{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:10px}
+.qa-row{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-top:1px solid var(--line)}
+.qa-row:first-of-type{border-top:none;padding-top:0}
+.qa-badge{font-family:var(--font-mono);font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:5px;flex:none;margin-top:1px;letter-spacing:.03em}
+.qa-badge.pass{background:var(--pass-soft);color:var(--pass-ink);border:1px solid var(--pass-line)}
+.qa-badge.warn{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
+.qa-text b{display:block;font-size:12.5px;font-weight:600;margin-bottom:2px}
+.qa-text span{font-size:11.5px;color:var(--muted);line-height:1.4}
+
+.gate-status{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;padding:10px 12px;border-radius:9px;margin-bottom:10px}
+.gate-status.blocked{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
+.gate-status.ready{background:var(--pass-soft);color:var(--pass-ink);border:1px solid var(--pass-line)}
+.btn-export{width:100%;font-family:var(--font-sans);font-size:13px;font-weight:700;background:var(--brand);color:#fff;border:0;border-radius:9px;padding:11px 14px;cursor:pointer;margin-bottom:7px}
+.btn-export.secondary{background:var(--ink);color:var(--paper)}
+.btn-export:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
+.export-status{font-size:11.5px;color:var(--muted);display:block;margin-top:4px;line-height:1.45}
+
+.editor-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:900px){.editor-row{grid-template-columns:1fr}}
+.editor-block h4{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-bottom:8px}
+textarea{width:100%;min-height:230px;background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-family:var(--font-mono);font-size:11.5px;line-height:1.55;color:var(--ink);resize:vertical}
+.editor-actions{display:flex;align-items:center;gap:10px;margin-top:8px}
+.btn-apply{font-family:var(--font-sans);font-size:12px;font-weight:700;background:var(--ink);color:var(--paper);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+.editor-err{font-size:11.5px;color:var(--warn)}
+.icon-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
+.icon-legend span{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:3px 7px;background:var(--surface)}
+
+.limits{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
+.limits h4{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:10px}
+.limits ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.limits li{font-size:12px;color:var(--muted);line-height:1.5}
+footer.foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.6}
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <span class="eyebrow">Test-Prototyp · v3 · Master verankert</span>
+    <h1>Foliensystem auf dem Unternehmensmaster</h1>
+    <p class="lede">Der Master ist in dieser Datei eingebettet. Farben, Schriften und das 12-Spalten-Raster werden aus ihm gelesen, nicht geraten — und der Export schreibt die Folien in genau dieses Master-Paket hinein. In PowerPoint geöffnet: echtes Theme, alle Original-Layouts, Titel als richtiger Platzhalter.</p>
+  </header>
+
+  <div class="masterbar">
+    <span class="dot" id="masterDot"></span>
+    <div class="info">
+      <b id="masterName">Master wird geladen…</b>
+      <span id="masterMeta">—</span>
+    </div>
+    <div class="spacer"></div>
+    <label class="filebtn">Anderen Master laden<input type="file" id="masterFile" accept=".pptx,.potx"></label>
+  </div>
+
+  <section class="toolbar">
+    <div class="tpl-group" id="tplGroup"></div>
+    <div class="spacer"></div>
+    <span class="field-label">Layout</span>
+    <select class="sel" id="layoutSelect"></select>
+    <label class="toggle"><input type="checkbox" id="gridToggle"> Raster</label>
+  </section>
+
+  <div class="workbench-grid">
+    <div>
+      <div class="slide-frame" id="frame"><div class="grid-overlay" id="gridOverlay"></div></div>
+      <p class="frame-note" id="frameNote">—</p>
+    </div>
+    <div class="side-panel">
+      <div class="panel-block">
+        <div class="gate-status" id="gateStatus">Prüfe…</div>
+        <button class="btn-export" id="exportBtn" disabled>Diese Folie als .pptx</button>
+        <button class="btn-export secondary" id="exportAllBtn" disabled>Alle 6 Folien als .pptx</button>
+        <span class="export-status" id="exportStatusText"></span>
+      </div>
+      <div class="panel-block">
+        <h4>Quality Gate</h4>
+        <div id="qaList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="editor-row">
+    <div class="editor-block">
+      <h4>Inhalt dieser Folie (JSON) — hier testen</h4>
+      <textarea id="contentEditor" spellcheck="false"></textarea>
+      <div class="editor-actions">
+        <button class="btn-apply" id="applyBtn">Anwenden</button>
+        <span class="editor-err" id="editorErr"></span>
+      </div>
+      <div class="icon-legend" id="iconLegend"></div>
+    </div>
+    <div class="editor-block">
+      <h4>Was daraus gebaut wird (Objektliste, Auszug)</h4>
+      <textarea id="objectPreview" readonly></textarea>
+    </div>
+  </div>
+
+  <div class="limits">
+    <h4>Was der Export tut — und was er nicht tut</h4>
+    <ul>
+      <li><b>Verknüpft:</b> Die Folien werden in das Original-Master-Paket geschrieben. Theme, alle Original-Layouts, Fußzeile und Foliennummer bleiben erhalten; Farben referenzieren die Theme-Rollen (Magenta = <span class="mono">tx2</span>, Petrol = <span class="mono">accent1</span>) und Schriften die Theme-Schriften (<span class="mono">+mj-lt</span>/<span class="mono">+mn-lt</span>) — ändert das Unternehmen den Master, zieht die Folie nach.</li>
+      <li><b>Titel sind echte Platzhalter</b> und erscheinen damit in der Gliederungsansicht; die übrigen Elemente sind frei positionierte, normal editierbare Formen. Piktogramme sind gruppierte Vektorformen, in PowerPoint umfärbbar.</li>
+      <li><b>Bereinigt:</b> Die vier Beispielfolien des Masters und ihre Bilder werden aus dem Export entfernt, damit keine Fremdinhalte mitreisen.</li>
+      <li><b>Vorschau-Schrift:</b> Die Vorschau nutzt TeleNeo Office, falls lokal installiert — sonst greift ein Fallback und Zeilenumbrüche können minimal abweichen. Im Export steht immer die Theme-Schrift.</li>
+      <li><b>Noch offen:</b> Tabellen-Vorlage und ein größeres Piktogramm-Set; beides sind Registry-Einträge, keine Architekturänderung.</li>
+    </ul>
+  </div>
+
+  <footer class="foot">Raster, Farben und Schriften stammen aus dem eingebetteten Unternehmensmaster. Über „Anderen Master laden" lässt sich jederzeit eine aktualisierte Master-Datei verwenden — das Tool liest Theme und Layouts dann daraus.</footer>
+</div>
+
+<script>
+/* === ENGINE (identisch mit der getesteten Node-Version) === */
+__ENGINE__
+</script>
+<script>
+/* === eingebetteter Unternehmensmaster === */
+var MASTER_B64 = "__MASTER_B64__";
+</script>
+<script>
+(function(){
+  "use strict";
+  var E = window.StoryCraft;
+  var G = E.G;
+
+  var THEME = E.DEFAULT_THEME;
+  var masterData = null;
+  var layoutNames = [];
+  var contentState = {}, layoutState = {};
+  E.TPL_ORDER.forEach(function(k){
+    contentState[k] = JSON.parse(JSON.stringify(E.TEMPLATES[k].defaultContent));
+    layoutState[k] = E.TEMPLATES[k].layout;
+  });
+  var activeTpl = 'cover';
+  var currentScene = null;
+
+  function pct(v,total){ return (v/total*100).toFixed(3)+'%'; }
+  function b64ToBytes(b64){
+    var bin = atob(b64), len = bin.length, out = new Uint8Array(len);
+    for(var i=0;i<len;i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  // ---------- master ----------
+  async function loadMaster(data, label){
+    if(typeof JSZip === 'undefined') throw new Error('JSZip nicht geladen');
+    var zip = await JSZip.loadAsync(data);
+    var themeFile = zip.file('ppt/theme/theme1.xml');
+    if(!themeFile) throw new Error('Kein Theme im Paket gefunden');
+    THEME = E.parseTheme(await themeFile.async('string'));
+    layoutNames = [];
+    var paths = Object.keys(zip.files).filter(function(p){ return /^ppt\/slideLayouts\/slideLayout\d+\.xml$/.test(p); })
+      .sort(function(a,b){ return parseInt(a.match(/(\d+)/)[1],10) - parseInt(b.match(/(\d+)/)[1],10); });
+    for(var i=0;i<paths.length;i++){
+      layoutNames.push(E.parseLayoutName(await zip.file(paths[i]).async('string')));
+    }
+    masterData = data;
+    document.getElementById('masterName').textContent = THEME.name || label;
+    document.getElementById('masterMeta').textContent =
+      layoutNames.length + ' Layouts · ' + (THEME.fonts.minor||'—') + ' · Magenta ' + THEME.colors.tx2 + ' · Petrol ' + THEME.colors.accent1;
+    document.body.style.setProperty('--font-slide', '"'+(THEME.fonts.minor||'Segoe UI')+'","Segoe UI",Arial,sans-serif');
+    fillLayoutSelect();
+    draw();
+  }
+  function fillLayoutSelect(){
+    var sel = document.getElementById('layoutSelect');
+    sel.innerHTML = '';
+    var names = layoutNames.length ? layoutNames : [E.TEMPLATES[activeTpl].layout];
+    names.forEach(function(n){
+      var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o);
+    });
+    sel.value = layoutState[activeTpl];
+    if(sel.selectedIndex < 0 && names.length) sel.value = names[0];
+  }
+
+  // ---------- preview ----------
+  function renderScene(scene){
+    var frame = document.getElementById('frame');
+    var overlay = document.getElementById('gridOverlay');
+    Array.prototype.slice.call(frame.querySelectorAll('.obj')).forEach(function(n){ n.remove(); });
+    scene.objs.forEach(function(o){
+      var d = document.createElement('div');
+      d.className = 'obj' + (o.type==='icon' ? ' icon-obj' : '');
+      d.style.left = pct(o.x,G.W); d.style.top = pct(o.y,G.H);
+      d.style.width = pct(o.w,G.W); d.style.height = pct(o.h,G.H);
+      if(o.type==='box'){
+        d.style.background = '#'+o.fill.hex;
+        d.style.border = (o.lineW||0)+'px solid #'+((o.line||o.fill).hex);
+        d.style.borderRadius = 'calc(var(--pxpi,60) * 1px * '+(o.radius||0)+')';
+      } else if(o.type==='text'){
+        d.dataset.check = 'overflow';
+        d.style.fontSize = 'calc(var(--pxpi,60) * 1px * '+(o.fontSize/72)+')';
+        d.style.fontWeight = o.bold ? '700' : '400';
+        d.style.color = '#'+o.color.hex;
+        d.style.lineHeight = String(o.leading||1.2);
+        d.style.textAlign = o.align||'left';
+        d.style.display = 'flex';
+        d.style.alignItems = o.valign==='mid' ? 'center' : 'flex-start';
+        d.style.justifyContent = o.align==='center' ? 'center' : (o.align==='right' ? 'flex-end' : 'flex-start');
+        d.textContent = o.value||'';
+      } else if(o.type==='icon'){
+        d.innerHTML = E.svgFor(o.name, o.color.hex);
+      }
+      frame.appendChild(d);
+    });
+    frame.appendChild(overlay);
+    frame.style.setProperty('--pxpi', (frame.clientWidth/G.W).toFixed(3));
+    renderOverlay(overlay);
+  }
+  function renderOverlay(overlay){
+    overlay.innerHTML = '';
+    var safe = document.createElement('div');
+    safe.className = 'safe';
+    safe.style.left = pct(G.SAFE.left,G.W); safe.style.top = pct(G.SAFE.top,G.H);
+    safe.style.right = pct(G.W-G.SAFE.right,G.W); safe.style.bottom = pct(G.H-G.SAFE.bottom,G.H);
+    overlay.appendChild(safe);
+    var zone = document.createElement('div');
+    zone.className = 'zone';
+    zone.style.left = pct(G.TITLE.x,G.W); zone.style.top = pct(G.TITLE.y,G.H);
+    zone.style.width = pct(G.TITLE.w,G.W); zone.style.height = pct(G.TITLE.h,G.H);
+    overlay.appendChild(zone);
+    for(var c=0;c<G.COLS;c++){
+      var col = document.createElement('div');
+      col.className = 'col';
+      col.style.left = pct(E.colX(c),G.W); col.style.width = pct(G.COLW,G.W);
+      overlay.appendChild(col);
+    }
+  }
+
+  // ---------- gate ----------
+  function paintGate(rows){
+    document.getElementById('qaList').innerHTML = rows.map(function(r){
+      var badge = r.status==='pass' ? 'pass' : 'warn';
+      var label = r.status==='pass' ? 'PASS' : (r.status==='pending' ? '…' : 'WARN');
+      return '<div class="qa-row"'+(r.id?' data-row-id="'+r.id+'"':'')+'>'
+        + '<span class="qa-badge '+badge+'">'+label+'</span>'
+        + '<span class="qa-text"><b>'+r.title+'</b><span>'+r.detail+'</span></span></div>';
+    }).join('');
+  }
+  function updateGateStatus(){
+    var warns = document.querySelectorAll('#qaList .qa-badge.warn').length;
+    var statusEl = document.getElementById('gateStatus');
+    var b1 = document.getElementById('exportBtn'), b2 = document.getElementById('exportAllBtn');
+    var noMaster = !masterData;
+    if(noMaster){
+      statusEl.className = 'gate-status blocked';
+      statusEl.textContent = 'Kein Master geladen';
+      b1.disabled = true; b2.disabled = true;
+      return;
+    }
+    if(warns>0){
+      statusEl.className = 'gate-status blocked';
+      statusEl.textContent = 'Export gesperrt — '+warns+' Prüfung(en) auf WARN';
+      b1.disabled = true; b2.disabled = true;
+    } else {
+      statusEl.className = 'gate-status ready';
+      statusEl.textContent = 'Alle Prüfungen bestanden — Export bereit';
+      b1.disabled = false; b2.disabled = false;
+    }
+  }
+  function checkOverflow(){
+    requestAnimationFrame(function(){
+      setTimeout(function(){
+        var frame = document.getElementById('frame');
+        var clipped = Array.prototype.filter.call(frame.querySelectorAll('[data-check="overflow"]'), function(e){
+          return e.scrollHeight > e.clientHeight+2 || e.scrollWidth > e.clientWidth+2;
+        });
+        var row = document.querySelector('[data-row-id="overflow"]');
+        if(row){
+          var badge = row.querySelector('.qa-badge'), text = row.querySelector('.qa-text');
+          if(clipped.length){
+            badge.className='qa-badge warn'; badge.textContent='WARN';
+            text.innerHTML = '<b>Text-Overflow</b><span>'+clipped.length+' Textbox(en) potenziell abgeschnitten.</span>';
+          } else {
+            badge.className='qa-badge pass'; badge.textContent='PASS';
+            text.innerHTML = '<b>Text-Overflow</b><span>Keine abgeschnittenen Texte erkannt.</span>';
+          }
+        }
+        updateGateStatus();
+      }, 130);
+    });
+  }
+
+  function sceneFor(key){
+    var s = E.buildScene(key, contentState[key], THEME);
+    s.layoutName = layoutState[key];
+    return s;
+  }
+  function draw(){
+    currentScene = sceneFor(activeTpl);
+    renderScene(currentScene);
+    var rows = E.computeGate(currentScene);
+    rows.push({status:'pending', title:'Text-Overflow', detail:'Wird geprüft…', id:'overflow'});
+    paintGate(rows);
+    updateGateStatus();
+    checkOverflow();
+    document.getElementById('objectPreview').value =
+      JSON.stringify(currentScene.objs.slice(0,3), null, 2) + '\n… (' + currentScene.objs.length + ' Objekte gesamt)';
+    document.getElementById('frameNote').textContent =
+      'Layout „' + currentScene.layoutName + '" · Satzspiegel ' + G.SAFE.left.toFixed(2) + '"–' + G.SAFE.right.toFixed(2)
+      + '" · Titelzone y=' + G.TITLE.y.toFixed(2) + '" · ' + G.COLS + ' Spalten, Gutter ' + G.GUTTER.toFixed(2) + '"';
+  }
+
+  // ---------- export ----------
+  var downloadsNS = null;
+  if(window.claude && window.claude.use){
+    window.claude.use('downloads').then(function(ns){ downloadsNS = ns; }).catch(function(){ downloadsNS = null; });
+  }
+  async function deliver(blob, filename, statusEl){
+    if(downloadsNS){
+      try {
+        var res = await downloadsNS.save({ filename: filename, data: blob });
+        statusEl.textContent = res.status === 'saved' ? 'Gespeichert: '+filename : 'Übergeben.';
+        return;
+      } catch(err){
+        statusEl.textContent = (err && err.code === 'declined') ? 'Abgebrochen.' : 'Speichern fehlgeschlagen.';
+        return;
+      }
+    }
+    // Standardweg außerhalb von Claude-Artifacts (ChatGPT-Canvas, lokale Datei)
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    statusEl.textContent = 'Datei erzeugt: '+filename;
+  }
+  async function runExport(scenes, filename){
+    var statusEl = document.getElementById('exportStatusText');
+    if(!masterData){ statusEl.textContent = 'Kein Master geladen.'; return; }
+    statusEl.textContent = 'Schreibe Folien in den Master…';
+    try {
+      var zip = await E.injectIntoMaster(JSZip, masterData, scenes);
+      var blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE',
+        mimeType:'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
+      await deliver(blob, filename, statusEl);
+    } catch(err){
+      statusEl.textContent = 'Export fehlgeschlagen: ' + (err && err.message ? err.message : err);
+    }
+  }
+  document.getElementById('exportBtn').addEventListener('click', function(){
+    runExport([sceneFor(activeTpl)], 'storycraft-'+activeTpl+'.pptx');
+  });
+  document.getElementById('exportAllBtn').addEventListener('click', function(){
+    runExport(E.TPL_ORDER.map(sceneFor), 'storycraft-deck.pptx');
+  });
+
+  // ---------- wiring ----------
+  var tplGroup = document.getElementById('tplGroup');
+  E.TPL_ORDER.forEach(function(k){
+    var btn = document.createElement('button');
+    btn.className = 'tpl-btn' + (k===activeTpl ? ' active' : '');
+    btn.textContent = E.TEMPLATES[k].label;
+    btn.dataset.tpl = k;
+    btn.addEventListener('click', function(){
+      activeTpl = k;
+      Array.prototype.forEach.call(tplGroup.children, function(b){ b.classList.toggle('active', b.dataset.tpl===k); });
+      document.getElementById('contentEditor').value = JSON.stringify(contentState[k], null, 2);
+      document.getElementById('editorErr').textContent = '';
+      fillLayoutSelect();
+      draw();
+    });
+    tplGroup.appendChild(btn);
+  });
+  document.getElementById('layoutSelect').addEventListener('change', function(e){
+    layoutState[activeTpl] = e.target.value;
+    draw();
+  });
+  document.getElementById('gridToggle').addEventListener('change', function(e){
+    document.getElementById('gridOverlay').classList.toggle('show', e.target.checked);
+  });
+  document.getElementById('applyBtn').addEventListener('click', function(){
+    var ta = document.getElementById('contentEditor'), err = document.getElementById('editorErr');
+    try {
+      contentState[activeTpl] = JSON.parse(ta.value);
+      err.textContent = '';
+      draw();
+    } catch(e){ err.textContent = 'Ungültiges JSON: ' + e.message; }
+  });
+  document.getElementById('masterFile').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0];
+    if(!f) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      loadMaster(new Uint8Array(reader.result), f.name).catch(function(err){
+        document.getElementById('masterName').textContent = 'Master konnte nicht gelesen werden';
+        document.getElementById('masterMeta').textContent = String(err && err.message ? err.message : err);
+        document.getElementById('masterDot').style.background = 'var(--warn)';
+      });
+    };
+    reader.readAsArrayBuffer(f);
+  });
+  window.addEventListener('resize', function(){
+    var frame = document.getElementById('frame');
+    frame.style.setProperty('--pxpi', (frame.clientWidth/G.W).toFixed(3));
+  });
+  document.getElementById('iconLegend').innerHTML =
+    Object.keys(E.ICONS).map(function(n){ return '<span>'+n+'</span>'; }).join('');
+
+  // ---------- init ----------
+  function init(){
+    document.getElementById('contentEditor').value = JSON.stringify(contentState[activeTpl], null, 2);
+    fillLayoutSelect();
+    draw();
+    if(MASTER_B64 && MASTER_B64.length > 100){
+      loadMaster(b64ToBytes(MASTER_B64), 'Eingebetteter Master').catch(function(err){
+        document.getElementById('masterName').textContent = 'Eingebetteter Master nicht lesbar';
+        document.getElementById('masterMeta').textContent = String(err && err.message ? err.message : err);
+        document.getElementById('masterDot').style.background = 'var(--warn)';
+        updateGateStatus();
+      });
+    } else {
+      document.getElementById('masterName').textContent = 'Kein Master eingebettet';
+      document.getElementById('masterMeta').textContent = 'Bitte Master-Datei laden';
+      document.getElementById('masterDot').style.background = 'var(--warn)';
+      updateGateStatus();
+    }
+  }
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(init); } else { init(); }
+  window.addEventListener('load', function(){ setTimeout(draw, 80); });
+})();
+</script>

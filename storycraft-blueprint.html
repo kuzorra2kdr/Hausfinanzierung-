@@ -1,28 +1,29 @@
 <title>StoryCraft Blueprint</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{
   --paper:#F1F2F5; --surface:#FFFFFF; --surface-2:#F7F8FA; --ink:#14161A; --muted:#5B6169;
   --line:#DCDFE4; --warn:#8A4B06; --warn-soft:#FDF3E7; --warn-line:#E7C79A;
-  --pass-soft:#EAF6F1; --pass-ink:#0D7C66; --pass-line:#9FD2C8;
-  --code-bg:#EDEFF2; --shadow:0 20px 44px rgba(20,22,26,.12);
+  --pass-soft:#E8F6F4; --pass-ink:#0B7B70; --pass-line:#9AD6CF;
+  --brand:#E20074; --code-bg:#EDEFF2; --shadow:0 20px 44px rgba(20,22,26,.12);
   --font-sans:'IBM Plex Sans',"Segoe UI",Arial,sans-serif;
   --font-mono:'IBM Plex Mono',ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --font-slide:"TeleNeo Office","TeleNeo","Segoe UI",Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --paper:#15171B; --surface:#1C1F25; --surface-2:#22262D; --ink:#F1F2F4; --muted:#9BA1AC;
     --line:#2C3038; --warn:#F0A742; --warn-soft:#2E2313; --warn-line:#6B4C1E;
-    --pass-soft:#12261F; --pass-ink:#4FD3AE; --pass-line:#215243;
-    --code-bg:#22262D; --shadow:0 20px 44px rgba(0,0,0,.5);
+    --pass-soft:#0F2723; --pass-ink:#54D6C6; --pass-line:#1F4F49;
+    --brand:#FF4B9E; --code-bg:#22262D; --shadow:0 20px 44px rgba(0,0,0,.5);
   }
 }
 :root[data-theme="dark"]{
   --paper:#15171B; --surface:#1C1F25; --surface-2:#22262D; --ink:#F1F2F4; --muted:#9BA1AC;
   --line:#2C3038; --warn:#F0A742; --warn-soft:#2E2313; --warn-line:#6B4C1E;
-  --pass-soft:#12261F; --pass-ink:#4FD3AE; --pass-line:#215243;
-  --code-bg:#22262D; --shadow:0 20px 44px rgba(0,0,0,.5);
+  --pass-soft:#0F2723; --pass-ink:#54D6C6; --pass-line:#1F4F49;
+  --brand:#FF4B9E; --code-bg:#22262D; --shadow:0 20px 44px rgba(0,0,0,.5);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-sans)}
@@ -30,35 +31,43 @@ h1,h2,h3{margin:0;text-wrap:balance}
 p{margin:0}
 .mono{font-family:var(--font-mono)}
 .tnum{font-variant-numeric:tabular-nums}
-.page{max-width:1220px;margin:0 auto;padding:36px 24px 56px}
+.page{max-width:1240px;margin:0 auto;padding:34px 24px 56px}
 
-.masthead{display:flex;flex-direction:column;gap:9px;padding-bottom:22px;border-bottom:1px solid var(--line);margin-bottom:24px}
-.eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--pass-ink);font-weight:600}
-.masthead h1{font-size:clamp(24px,3.2vw,32px);font-weight:700;line-height:1.15;max-width:20ch}
-.masthead .lede{font-size:14.5px;line-height:1.55;color:var(--muted);max-width:70ch}
-.meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.chip{font-family:var(--font-mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:100px;padding:4px 10px;background:var(--surface)}
+.masthead{display:flex;flex-direction:column;gap:9px;padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--brand);font-weight:600}
+.masthead h1{font-size:clamp(23px,3vw,31px);font-weight:700;line-height:1.15;max-width:22ch}
+.masthead .lede{font-size:14.5px;line-height:1.55;color:var(--muted);max-width:74ch}
 
-.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.masterbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:16px}
+.masterbar .dot{width:9px;height:9px;border-radius:50%;background:var(--pass-ink);flex:none}
+.masterbar .info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.masterbar .info b{font-size:13px;font-weight:700}
+.masterbar .info span{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.masterbar .spacer{flex:1}
+.filebtn{font-family:var(--font-sans);font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer}
+.filebtn input{display:none}
+
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .tpl-group{display:flex;gap:6px;flex-wrap:wrap}
 .tpl-btn{font-family:var(--font-sans);font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:100px;padding:7px 13px;cursor:pointer}
 .tpl-btn.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.sel{font-family:var(--font-sans);font-size:12.5px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 10px}
+.sel{font-family:var(--font-sans);font-size:12.5px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 10px;max-width:220px}
 .spacer{flex:1}
 .toggle{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none}
-.toggle input{accent-color:var(--pass-ink)}
+.toggle input{accent-color:var(--brand)}
+.field-label{font-family:var(--font-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 
 .workbench-grid{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
 @media(max-width:900px){.workbench-grid{grid-template-columns:1fr}}
-.slide-frame{position:relative;width:100%;aspect-ratio:13.333/7.5;background:#fff;border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
-.obj{position:absolute;font-family:var(--font-sans);white-space:pre-wrap;overflow:hidden}
-.obj.mono-text{font-family:var(--font-mono)}
-.obj.icon-obj{display:block}
+.slide-frame{position:relative;width:100%;aspect-ratio:13.3333/7.5;background:#fff;border-radius:8px;overflow:hidden;box-shadow:var(--shadow)}
+.obj{position:absolute;font-family:var(--font-slide);white-space:pre-wrap;overflow:hidden}
 .obj.icon-obj svg{width:100%;height:100%;display:block}
 .grid-overlay{position:absolute;inset:0;pointer-events:none;display:none}
 .grid-overlay.show{display:block}
 .grid-overlay .col{position:absolute;top:0;bottom:0;background:rgba(226,0,116,.05);border-left:1px dashed rgba(120,120,130,.35);border-right:1px dashed rgba(120,120,130,.35)}
-.grid-overlay .margin{position:absolute;border:1.5px dashed rgba(20,22,26,.35)}
+.grid-overlay .safe{position:absolute;border:1.5px dashed rgba(20,22,26,.4)}
+.grid-overlay .zone{position:absolute;border:1px dashed rgba(226,0,116,.55)}
+.frame-note{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);margin-top:7px}
 
 .side-panel{display:flex;flex-direction:column;gap:14px}
 .panel-block{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
@@ -74,54 +83,63 @@ p{margin:0}
 .gate-status{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;padding:10px 12px;border-radius:9px;margin-bottom:10px}
 .gate-status.blocked{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
 .gate-status.ready{background:var(--pass-soft);color:var(--pass-ink);border:1px solid var(--pass-line)}
-.btn-export{width:100%;font-family:var(--font-sans);font-size:13px;font-weight:700;background:var(--pass-ink);color:#fff;border:0;border-radius:9px;padding:11px 14px;cursor:pointer;margin-top:4px}
+.btn-export{width:100%;font-family:var(--font-sans);font-size:13px;font-weight:700;background:var(--brand);color:#fff;border:0;border-radius:9px;padding:11px 14px;cursor:pointer;margin-bottom:7px}
+.btn-export.secondary{background:var(--ink);color:var(--paper)}
 .btn-export:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
-.export-status{font-size:11.5px;color:var(--muted);margin-top:8px;display:block}
+.export-status{font-size:11.5px;color:var(--muted);display:block;margin-top:4px;line-height:1.45}
 
 .editor-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
 @media(max-width:900px){.editor-row{grid-template-columns:1fr}}
 .editor-block h4{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-bottom:8px}
-textarea{width:100%;min-height:220px;background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-family:var(--font-mono);font-size:11.5px;line-height:1.55;color:var(--ink);resize:vertical}
+textarea{width:100%;min-height:230px;background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-family:var(--font-mono);font-size:11.5px;line-height:1.55;color:var(--ink);resize:vertical}
 .editor-actions{display:flex;align-items:center;gap:10px;margin-top:8px}
 .btn-apply{font-family:var(--font-sans);font-size:12px;font-weight:700;background:var(--ink);color:var(--paper);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
 .editor-err{font-size:11.5px;color:var(--warn)}
-.icon-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.icon-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
 .icon-legend span{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:3px 7px;background:var(--surface)}
 
 .limits{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
 .limits h4{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:10px}
 .limits ul{margin:0;padding-left:18px;display:grid;gap:6px}
 .limits li{font-size:12px;color:var(--muted);line-height:1.5}
-footer.foot{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.6}
+footer.foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.6}
 </style>
 
 <div class="page">
   <header class="masthead">
-    <span class="eyebrow">Test-Prototyp · v2</span>
-    <h1>Foliensystem zum Testen</h1>
-    <p class="lede">Gebaut nach Ihren Vorgaben: austauschbare CI-Sets, Piktogramme als native PowerPoint-Formen (nicht als Bild), sechs erweiterbare Vorlagen und ein Quality Gate, das den Export sperrt, bis wirklich alles passt. Links unten können Sie den Inhalt jeder Folie direkt als JSON bearbeiten und live testen.</p>
-    <div class="meta-row">
-      <span class="chip tnum">6 Vorlagen</span>
-      <span class="chip tnum">2 CI-Sets</span>
-      <span class="chip">Harte QA-Sperre</span>
-      <span class="chip">native Vektor-Icons</span>
-      <span class="chip">1 Datei, keine externen Assets</span>
-    </div>
+    <span class="eyebrow">Test-Prototyp · v3 · Master verankert</span>
+    <h1>Foliensystem auf dem Unternehmensmaster</h1>
+    <p class="lede">Der Master ist in dieser Datei eingebettet. Farben, Schriften und das 12-Spalten-Raster werden aus ihm gelesen, nicht geraten — und der Export schreibt die Folien in genau dieses Master-Paket hinein. In PowerPoint geöffnet: echtes Theme, alle Original-Layouts, Titel als richtiger Platzhalter.</p>
   </header>
 
+  <div class="masterbar">
+    <span class="dot" id="masterDot"></span>
+    <div class="info">
+      <b id="masterName">Master wird geladen…</b>
+      <span id="masterMeta">—</span>
+    </div>
+    <div class="spacer"></div>
+    <label class="filebtn">Anderen Master laden<input type="file" id="masterFile" accept=".pptx,.potx"></label>
+  </div>
+
   <section class="toolbar">
-    <select class="sel" id="ciSelect"></select>
     <div class="tpl-group" id="tplGroup"></div>
     <div class="spacer"></div>
-    <label class="toggle"><input type="checkbox" id="gridToggle"> Raster anzeigen</label>
+    <span class="field-label">Layout</span>
+    <select class="sel" id="layoutSelect"></select>
+    <label class="toggle"><input type="checkbox" id="gridToggle"> Raster</label>
   </section>
 
   <div class="workbench-grid">
-    <div class="slide-frame" id="frame"><div class="grid-overlay" id="gridOverlay"></div></div>
+    <div>
+      <div class="slide-frame" id="frame"><div class="grid-overlay" id="gridOverlay"></div></div>
+      <p class="frame-note" id="frameNote">—</p>
+    </div>
     <div class="side-panel">
       <div class="panel-block">
         <div class="gate-status" id="gateStatus">Prüfe…</div>
-        <button class="btn-export" id="exportBtn" disabled>Als .pptx exportieren</button>
+        <button class="btn-export" id="exportBtn" disabled>Diese Folie als .pptx</button>
+        <button class="btn-export secondary" id="exportAllBtn" disabled>Alle 6 Folien als .pptx</button>
         <span class="export-status" id="exportStatusText"></span>
       </div>
       <div class="panel-block">
@@ -148,376 +166,694 @@ footer.foot{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);fo
   </div>
 
   <div class="limits">
-    <h4>Bekannte Grenzen dieses Prototyps</h4>
+    <h4>Was der Export tut — und was er nicht tut</h4>
     <ul>
-      <li>Die Icons sind ein eigenes, an Lucide angelehntes Strichset aus sechs Glyphen (Grundformen: Linie, Kreis, Rechteck) — keine 1:1-Kopie der Lucide-Pfaddaten, aber im Export echte, in PowerPoint frei editierbare Vektorformen. Ein generischer Konverter für beliebige Lucide-Icons ist mit pptxgenjs nicht zuverlässig baubar.</li>
-      <li>Die Tabellen/Datenraster-Vorlage ist in der Vorlagen-Registry vorgesehen, hier aus Zeitgründen noch nicht implementiert — neue Vorlagen sind reine Registry-Einträge, keine Architekturänderung.</li>
-      <li>Eckenradien werden im PPTX-Export aktuell als scharfe Kante übernommen (Rundung folgt).</li>
+      <li><b>Verknüpft:</b> Die Folien werden in das Original-Master-Paket geschrieben. Theme, alle Original-Layouts, Fußzeile und Foliennummer bleiben erhalten; Farben referenzieren die Theme-Rollen (Magenta = <span class="mono">tx2</span>, Petrol = <span class="mono">accent1</span>) und Schriften die Theme-Schriften (<span class="mono">+mj-lt</span>/<span class="mono">+mn-lt</span>) — ändert das Unternehmen den Master, zieht die Folie nach.</li>
+      <li><b>Titel sind echte Platzhalter</b> und erscheinen damit in der Gliederungsansicht; die übrigen Elemente sind frei positionierte, normal editierbare Formen. Piktogramme sind gruppierte Vektorformen, in PowerPoint umfärbbar.</li>
+      <li><b>Bereinigt:</b> Die vier Beispielfolien des Masters und ihre Bilder werden aus dem Export entfernt, damit keine Fremdinhalte mitreisen.</li>
+      <li><b>Vorschau-Schrift:</b> Die Vorschau nutzt TeleNeo Office, falls lokal installiert — sonst greift ein Fallback und Zeilenumbrüche können minimal abweichen. Im Export steht immer die Theme-Schrift.</li>
+      <li><b>Noch offen:</b> Tabellen-Vorlage und ein größeres Piktogramm-Set; beides sind Registry-Einträge, keine Architekturänderung.</li>
     </ul>
   </div>
 
-  <footer class="foot">Prototyp auf Basis der Analyse von „StoryCraft_Management_Pitch_v62_VISUAL_REDRAW_PREVIEW.html" und Ihrer Antworten zu Export-Pfad, Icons, CI-Sets und QA-Strenge.</footer>
+  <footer class="foot">Raster, Farben und Schriften stammen aus dem eingebetteten Unternehmensmaster. Über „Anderen Master laden" lässt sich jederzeit eine aktualisierte Master-Datei verwenden — das Tool liest Theme und Layouts dann daraus.</footer>
 </div>
 
 <script>
-(function(){
-  "use strict";
-  var CANVAS_W = 13.333, CANVAS_H = 7.5, MARGIN = 0.5, GUTTER = 0.2, COLS = 12;
-  var COLW = (CANVAS_W - 2*MARGIN - (COLS-1)*GUTTER) / COLS;
-  function colX(c){ return MARGIN + c*(COLW+GUTTER); }
-  function colW(span){ return span*COLW + (span-1)*GUTTER; }
-  var CONTENT_TOP = MARGIN + 1.05 + GUTTER;
-  var CONTENT_BOTTOM = CANVAS_H - MARGIN - 0.3 - GUTTER;
-  function pct(v, total){ return (v/total*100).toFixed(3) + '%'; }
+/* === ENGINE (identisch mit der getesteten Node-Version) === */
+/* StoryCraft Engine — shared by the browser tool and the Node test harness.
+   Grid + templates + icons + OOXML slide generation + master injection. */
+(function(root){
+"use strict";
 
-  // ---------- CI token sets ----------
-  var CI_SETS = {
-    telekom: { name:'Telekom · Magenta / Smaragd', accent:'E20074', accent2:'0D7C66', ink:'17191D', muted:'5B6169', surface:'F7F8FA', line:'DCDFE4', onAccent:'FFFFFF' },
-    neutral: { name:'Neutral · Blau / Amber', accent:'2451B8', accent2:'B4690E', ink:'1A1D22', muted:'596072', surface:'F3F5F9', line:'D8DDE6', onAccent:'FFFFFF' }
-  };
-  var activeCI = 'telekom';
+// ---------- canvas + grid (values read off the corporate master) ----------
+var G = {
+  W: 13.3333, H: 7.5,
+  MARGIN: 0.52, GUTTER: 0.31, COLS: 12,
+  TITLE: { x:0.52, y:0.44, w:12.28, h:0.79 },
+  CONTENT_TOP: 1.62, CONTENT_H: 5.36
+};
+G.CONTENT_BOTTOM = G.CONTENT_TOP + G.CONTENT_H;
+G.COLW = (G.W - 2*G.MARGIN - (G.COLS-1)*G.GUTTER) / G.COLS;
+// Safe area as the master defines it: side margins from the content placeholders,
+// top from the title, bottom from the footer band.
+G.SAFE = { left:G.MARGIN, right:G.W-G.MARGIN, top:0.44, bottom:7.06 };
+function colX(c){ return G.MARGIN + c*(G.COLW+G.GUTTER); }
+function colW(span){ return span*G.COLW + (span-1)*G.GUTTER; }
 
-  // ---------- icon registry: one descriptor, two renderers ----------
-  var ICONS = {
-    check: [ {op:'line',x1:4,y1:12.5,x2:9.5,y2:18}, {op:'line',x1:9.5,y1:18,x2:20,y2:6} ],
-    'arrow-right': [ {op:'line',x1:3.5,y1:12,x2:18,y2:12}, {op:'line',x1:12,y1:6,x2:18.5,y2:12}, {op:'line',x1:12,y1:18,x2:18.5,y2:12} ],
-    target: [ {op:'circle',cx:12,cy:12,r:8.5}, {op:'circle',cx:12,cy:12,r:5}, {op:'circle',cx:12,cy:12,r:1.6} ],
-    'trending-up': [ {op:'line',x1:3,y1:17,x2:9,y2:11}, {op:'line',x1:9,y1:11,x2:13,y2:15}, {op:'line',x1:13,y1:15,x2:21,y2:7}, {op:'line',x1:15,y1:7,x2:21,y2:7}, {op:'line',x1:21,y1:7,x2:21,y2:13} ],
-    layers: [ {op:'line',x1:12,y1:3,x2:21,y2:8}, {op:'line',x1:21,y1:8,x2:12,y2:13}, {op:'line',x1:12,y1:13,x2:3,y2:8}, {op:'line',x1:3,y1:8,x2:12,y2:3}, {op:'line',x1:4,y1:12.5,x2:12,y2:17}, {op:'line',x1:12,y1:17,x2:20,y2:12.5}, {op:'line',x1:4,y1:16,x2:12,y2:20.5}, {op:'line',x1:12,y1:20.5,x2:20,y2:16} ],
-    users: [ {op:'circle',cx:9,cy:8,r:3.1}, {op:'circle',cx:17,cy:9.4,r:2.5}, {op:'rect',x:3.4,y:13.6,w:11.2,h:7.2,rx:3.6}, {op:'rect',x:14.6,y:14.4,w:7.6,h:5.8,rx:2.9} ]
+// ---------- theme defaults (overwritten when a master is loaded) ----------
+var DEFAULT_THEME = {
+  name: 'Deutsche Telekom – Circle (06/2021)',
+  colors: { tx1:'000000', bg1:'FFFFFF', tx2:'E20074', bg2:'A3A3A3',
+            accent1:'32B9AF', accent2:'A4DEEE', accent3:'ECCCBF',
+            accent4:'F0E68C', accent5:'00A8E6', accent6:'6E648C' },
+  fonts: { major:'TeleNeo Office ExtraBold', minor:'TeleNeo Office' }
+};
+
+// Palette roles used by the templates. Each entry is a THEME ROLE, so the
+// exported XML can reference the master's theme instead of a frozen hex.
+function paletteFor(theme){
+  var c = theme.colors;
+  return {
+    ink:      { role:'tx1',     hex:c.tx1 },
+    accent:   { role:'tx2',     hex:c.tx2 },
+    accent2:  { role:'accent1', hex:c.accent1 },
+    muted:    { role:'bg2',     hex:c.bg2 },
+    onAccent: { role:'bg1',     hex:c.bg1 },
+    surface:  { role:null,      hex:'F5F6F7' },
+    line:     { role:null,      hex:'D9DCE0' }
   };
-  function svgFor(name, colorHex){
-    var ops = ICONS[name] || ICONS.check;
-    var inner = ops.map(function(op){
-      if(op.op==='line') return '<line x1="'+op.x1+'" y1="'+op.y1+'" x2="'+op.x2+'" y2="'+op.y2+'"/>';
-      if(op.op==='circle') return '<circle cx="'+op.cx+'" cy="'+op.cy+'" r="'+op.r+'"/>';
-      if(op.op==='rect') return '<rect x="'+op.x+'" y="'+op.y+'" width="'+op.w+'" height="'+op.h+'" rx="'+(op.rx||0)+'"/>';
-      return '';
-    }).join('');
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="#'+colorHex+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>';
+}
+
+// ---------- icons: one descriptor, three renderers (SVG, OOXML, gate) ----------
+var ICONS = {
+  check: [ {op:'line',x1:4,y1:12.5,x2:9.5,y2:18}, {op:'line',x1:9.5,y1:18,x2:20,y2:6} ],
+  'arrow-right': [ {op:'line',x1:3.5,y1:12,x2:18,y2:12}, {op:'line',x1:12,y1:6,x2:18.5,y2:12}, {op:'line',x1:12,y1:18,x2:18.5,y2:12} ],
+  target: [ {op:'circle',cx:12,cy:12,r:8.5}, {op:'circle',cx:12,cy:12,r:5}, {op:'circle',cx:12,cy:12,r:1.6} ],
+  'trending-up': [ {op:'line',x1:3,y1:17,x2:9,y2:11}, {op:'line',x1:9,y1:11,x2:13,y2:15}, {op:'line',x1:13,y1:15,x2:21,y2:7}, {op:'line',x1:15,y1:7,x2:21,y2:7}, {op:'line',x1:21,y1:7,x2:21,y2:13} ],
+  layers: [ {op:'line',x1:12,y1:3,x2:21,y2:8}, {op:'line',x1:21,y1:8,x2:12,y2:13}, {op:'line',x1:12,y1:13,x2:3,y2:8}, {op:'line',x1:3,y1:8,x2:12,y2:3}, {op:'line',x1:4,y1:12.5,x2:12,y2:17}, {op:'line',x1:12,y1:17,x2:20,y2:12.5}, {op:'line',x1:4,y1:16,x2:12,y2:20.5}, {op:'line',x1:12,y1:20.5,x2:20,y2:16} ],
+  users: [ {op:'circle',cx:9,cy:8,r:3.1}, {op:'circle',cx:17,cy:9.4,r:2.5}, {op:'rect',x:3.4,y:13.6,w:11.2,h:7.2,rx:3.6}, {op:'rect',x:14.6,y:14.4,w:7.6,h:5.8,rx:2.9} ]
+};
+function iconName(n){ return ICONS[n] ? n : 'check'; }
+function svgFor(name, hex){
+  var inner = (ICONS[name]||ICONS.check).map(function(op){
+    if(op.op==='line') return '<line x1="'+op.x1+'" y1="'+op.y1+'" x2="'+op.x2+'" y2="'+op.y2+'"/>';
+    if(op.op==='circle') return '<circle cx="'+op.cx+'" cy="'+op.cy+'" r="'+op.r+'"/>';
+    if(op.op==='rect') return '<rect x="'+op.x+'" y="'+op.y+'" width="'+op.w+'" height="'+op.h+'" rx="'+(op.rx||0)+'"/>';
+    return '';
+  }).join('');
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="#'+hex+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>';
+}
+
+// ---------- object constructors ----------
+function T(id,x,y,w,h,value,fontSize,o){
+  o = o||{};
+  return { id:id, type:'text', x:x, y:y, w:w, h:h, value:value==null?'':String(value), fontSize:fontSize,
+    bold:!!o.bold, color:o.color||{role:'tx1',hex:'000000'}, align:o.align||'left',
+    valign:o.valign||'top', leading:o.leading||1.2, mono:!!o.mono, placeholder:o.placeholder||null };
+}
+function Bx(id,x,y,w,h,o){
+  o = o||{};
+  return { id:id, type:'box', x:x, y:y, w:w, h:h, fill:o.fill, line:o.line||null,
+    lineW:o.lineW||0, radius:o.radius||0, peerGroup:o.peerGroup||null, decor:!!o.decor };
+}
+function Ic(id,name,x,y,size,color){ return { id:id, type:'icon', name:iconName(name), x:x, y:y, w:size, h:size, color:color }; }
+
+// ---------- templates: content in, objects out ----------
+var TEMPLATES = {
+  cover: {
+    label:'Cover', layout:'Leer',
+    defaultContent:{
+      eyebrow:'AI & DATA DELIVERY HUB',
+      title:'Von der Chat-Antwort\nzur Boardroom-Folie',
+      subtitle:'Ein Raster ersetzt geratene Koordinaten. Dieselbe Objektliste füllt HTML-Vorschau und PowerPoint.',
+      badge:['12 SPALTEN','0,52" RAND','0,31" GUTTER','MASTER-GEBUNDEN']
+    },
+    build:function(c,P){
+      return { objs:[
+        T('eyebrow', colX(0), G.MARGIN+0.1, colW(7), 0.28, c.eyebrow, 11, {bold:true, color:P.accent}),
+        T('title', colX(0), 1.05, colW(8), 1.6, c.title, 34, {bold:true, color:P.ink, leading:1.15}),
+        Bx('rule', colX(0), 2.90, 0.62, 0.04, {fill:P.accent2}),
+        T('sub', colX(0), 3.15, colW(7), 1.0, c.subtitle, 14, {color:P.ink}),
+        Bx('panel', colX(8), G.CONTENT_TOP, colW(4), G.CONTENT_H, {fill:P.accent, radius:0.16}),
+        Ic('panelIcon', 'layers', colX(8)+0.45, G.CONTENT_TOP+0.55, 0.8, P.onAccent),
+        T('panelTxt', colX(8)+0.45, G.CONTENT_TOP+1.75, colW(4)-0.9, 2.6, (c.badge||[]).join('\n'), 13, {bold:true, color:P.onAccent, leading:2.1})
+      ]};
+    }
+  },
+  agenda: {
+    label:'Agenda', layout:'Nur Titel',
+    defaultContent:{ title:'Agenda', items:[
+      {label:'Ausgangslage und Zielbild'},
+      {label:'Diagnose: Freihand statt Raster'},
+      {label:'Raster-Engine im Test'},
+      {label:'Rollout im Unternehmen'} ]},
+    build:function(c,P){
+      var objs = [ T('title', G.TITLE.x, G.TITLE.y, G.TITLE.w, G.TITLE.h, c.title, 40, {bold:true, color:P.ink, placeholder:'title'}) ];
+      var items = c.items||[], n = items.length||1;
+      var stepH = Math.min(1.3, G.CONTENT_H/Math.max(n,1));
+      items.forEach(function(it,i){
+        var y = G.CONTENT_TOP + i*stepH;
+        objs.push(Bx('num'+i, colX(0), y, 0.62, 0.62, {fill:P.accent, radius:0.31}));
+        objs.push(T('numTxt'+i, colX(0), y, 0.62, 0.62, String(i+1).padStart(2,'0'), 14, {bold:true, color:P.onAccent, align:'center', valign:'mid'}));
+        objs.push(T('lbl'+i, colX(0)+0.86, y, colW(12)-1.04, 0.62, it.label, 17, {color:P.ink, valign:'mid'}));
+      });
+      return { objs:objs };
+    }
+  },
+  kpi: {
+    label:'Kennzahlen', layout:'Nur Titel',
+    defaultContent:{
+      title:'Was die Engine leistet',
+      lead:'Qualität entsteht nicht durch Nachbessern am Bildschirm, sondern durch ein Raster, das Abweichungen gar nicht erst zulässt.',
+      kpis:[
+        {value:'21', label:'Layouts des Unternehmensmasters bleiben verknüpft', icon:'layers'},
+        {value:'12', label:'Spalten, direkt aus der Master-Geometrie abgeleitet', icon:'target'},
+        {value:'0', label:'Nacharbeit an Rändern und Abständen', icon:'check'} ]},
+    build:function(c,P){
+      var objs = [
+        T('title', G.TITLE.x, G.TITLE.y, G.TITLE.w, G.TITLE.h, c.title, 40, {bold:true, color:P.ink, placeholder:'title'}),
+        T('lead', colX(0), G.CONTENT_TOP, colW(12), 0.75, c.lead, 16, {color:P.ink})
+      ];
+      var kpis = c.kpis||[], n = kpis.length||1, span = G.COLS/n;
+      var kpiY = G.CONTENT_TOP + 1.05, kpiH = 3.1;
+      kpis.forEach(function(k,i){
+        var x = colX(i*span), w = colW(span);
+        objs.push(Bx('card'+i, x, kpiY, w, kpiH, {fill:{role:null,hex:'F5F6F7'}, line:P.line, lineW:1, radius:0.12, peerGroup:'kpi'}));
+        if(k.icon){
+          objs.push(Bx('ibadge'+i, x+0.3, kpiY+0.34, 0.62, 0.62, {fill:P.onAccent, line:P.line, lineW:1, radius:0.31}));
+          objs.push(Ic('icon'+i, k.icon, x+0.46, kpiY+0.50, 0.30, P.accent));
+        }
+        objs.push(T('val'+i, x+0.3, kpiY+1.28, w-0.6, 0.7, k.value, 36, {bold:true, color:P.accent}));
+        objs.push(T('lbl'+i, x+0.3, kpiY+2.12, w-0.6, 0.8, k.label, 12, {color:P.ink, leading:1.35}));
+      });
+      return { objs:objs };
+    }
+  },
+  split: {
+    label:'Vergleich', layout:'Nur Titel',
+    defaultContent:{
+      title:'Freihand vs. Raster-Engine',
+      left:{ label:'Freihand — Ist-Zustand', icon:'trending-up', items:['Koordinaten pro Objekt geschätzt','Ränder wandern von Folie zu Folie','Kein Kontrast- oder Abstands-Check','Kein Bezug zum Unternehmensmaster'] },
+      right:{ label:'Raster-Engine — Zielbild', icon:'check', items:['12-Spalten-Raster aus dem Master','Vorlagen bekommen Inhalt, keine Koordinaten','Gate prüft Rand, Überlappung, Kontrast','Export bleibt mit dem Master verknüpft'] } },
+    build:function(c,P){
+      var objs = [ T('title', G.TITLE.x, G.TITLE.y, G.TITLE.w, G.TITLE.h, c.title, 40, {bold:true, color:P.ink, placeholder:'title'}) ];
+      [ {sc:0, d:c.left, tint:P.muted}, {sc:6, d:c.right, tint:P.accent2} ].forEach(function(col){
+        var x = colX(col.sc), w = colW(6), d = col.d||{};
+        objs.push(Bx('rule'+col.sc, x, G.CONTENT_TOP, w, 0.04, {fill:col.tint}));
+        objs.push(Ic('hIcon'+col.sc, d.icon, x, G.CONTENT_TOP+0.3, 0.34, col.tint));
+        objs.push(T('head'+col.sc, x+0.5, G.CONTENT_TOP+0.28, w-0.5, 0.4, d.label, 16, {bold:true, color:P.ink}));
+        var rowY = G.CONTENT_TOP+1.05, rowH = 0.95;
+        (d.items||[]).forEach(function(item,i){
+          objs.push(T('b'+col.sc+i, x, rowY+i*rowH, w, rowH-0.1, '– '+item, 13, {color:P.ink, leading:1.3}));
+        });
+      });
+      return { objs:objs };
+    }
+  },
+  timeline: {
+    label:'Prozess', layout:'Nur Titel',
+    defaultContent:{ title:'Rollout-Prozess', steps:[
+      {label:'Master verankern', icon:'layers'},
+      {label:'Content statt Koordinaten', icon:'users'},
+      {label:'Vorschau redigieren', icon:'trending-up'},
+      {label:'Export bleibt verknüpft', icon:'check'} ]},
+    build:function(c,P){
+      var objs = [ T('title', G.TITLE.x, G.TITLE.y, G.TITLE.w, G.TITLE.h, c.title, 40, {bold:true, color:P.ink, placeholder:'title'}) ];
+      var steps = c.steps||[], n = steps.length||1;
+      var segW = colW(12)/n, nodeSize = 1.1;
+      var blockH = nodeSize + 0.24 + 0.8;
+      var nodeY = G.CONTENT_TOP + (G.CONTENT_H - blockH)/2;
+      objs.push(Bx('track', colX(0)+nodeSize/2, nodeY+nodeSize/2-0.02, colW(12)-nodeSize, 0.04, {fill:P.line, decor:true}));
+      steps.forEach(function(s,i){
+        var cx = colX(0) + segW*(i+0.5);
+        objs.push(Bx('node'+i, cx-nodeSize/2, nodeY, nodeSize, nodeSize, {fill:P.accent2, radius:nodeSize/2, peerGroup:'steps'}));
+        objs.push(Ic('nicon'+i, s.icon, cx-nodeSize*0.25, nodeY+nodeSize*0.25, nodeSize*0.5, P.onAccent));
+        objs.push(T('nlbl'+i, cx-segW/2+0.12, nodeY+nodeSize+0.24, segW-0.24, 0.8, s.label, 14, {color:P.ink, align:'center', leading:1.3}));
+      });
+      return { objs:objs };
+    }
+  },
+  closing: {
+    label:'Abschluss', layout:'Leer',
+    defaultContent:{ title:'Bereit zum Testen', subtitle:'Gleiches Raster, gleicher Master, gleicher Export.', cta:'Content-JSON anpassen und exportieren' },
+    build:function(c,P){
+      return { objs:[
+        T('title', colX(0), G.CONTENT_TOP+0.3, colW(8), 0.85, c.title, 34, {bold:true, color:P.ink}),
+        T('sub', colX(0), G.CONTENT_TOP+1.35, colW(7), 0.6, c.subtitle, 16, {color:P.ink}),
+        Bx('cta', colX(0), G.CONTENT_TOP+2.3, 5.1, 0.62, {fill:P.accent, radius:0.31}),
+        T('ctaTxt', colX(0)+0.3, G.CONTENT_TOP+2.3, 5.1-0.6, 0.62, c.cta, 13, {bold:true, color:P.onAccent, valign:'mid'}),
+        Bx('badge', colX(9), G.CONTENT_TOP+0.9, 2.0, 2.0, {fill:P.accent2, radius:1.0}),
+        Ic('badgeIcon', 'check', colX(9)+0.65, G.CONTENT_TOP+0.9+0.65, 0.7, P.onAccent)
+      ]};
+    }
   }
-  function addIconToSlide(slide, name, xIn, yIn, sizeIn, colorHex){
-    var ops = ICONS[name] || ICONS.check, scale = sizeIn/24;
-    ops.forEach(function(op){
-      if(op.op==='line'){
-        var X1=xIn+op.x1*scale, Y1=yIn+op.y1*scale, X2=xIn+op.x2*scale, Y2=yIn+op.y2*scale;
-        var bx=Math.min(X1,X2), by=Math.min(Y1,Y2);
-        var bw=Math.max(Math.abs(X2-X1),0.01), bh=Math.max(Math.abs(Y2-Y1),0.01);
-        slide.addShape('line', { x:bx, y:by, w:bw, h:bh, line:{ color:colorHex, width:1.25 }, flipV: Y2<Y1 });
-      } else if(op.op==='circle'){
-        var cx=xIn+op.cx*scale, cy=yIn+op.cy*scale, r=op.r*scale;
-        slide.addShape('ellipse', { x:cx-r, y:cy-r, w:r*2, h:r*2, fill:{type:'none'}, line:{ color:colorHex, width:1.25 } });
-      } else if(op.op==='rect'){
-        var rx=xIn+op.x*scale, ry=yIn+op.y*scale, rw=op.w*scale, rh=op.h*scale;
-        slide.addShape(op.rx ? 'roundRect' : 'rect', { x:rx, y:ry, w:rw, h:rh, fill:{type:'none'}, line:{ color:colorHex, width:1.25 } });
+};
+var TPL_ORDER = ['cover','agenda','kpi','split','timeline','closing'];
+
+function buildScene(tplKey, content, theme){
+  var P = paletteFor(theme || DEFAULT_THEME);
+  var scene = TEMPLATES[tplKey].build(content, P);
+  scene.layoutName = TEMPLATES[tplKey].layout;
+  scene.template = tplKey;
+  return scene;
+}
+
+// ---------- quality gate (pure geometry, no DOM) ----------
+function rectsOverlap(a,b){
+  var ox = Math.min(a.x+a.w,b.x+b.w) - Math.max(a.x,b.x);
+  var oy = Math.min(a.y+a.h,b.y+b.h) - Math.max(a.y,b.y);
+  return (ox>0 && oy>0) ? ox*oy : 0;
+}
+function relLum(hex){
+  hex = String(hex).replace('#','');
+  var n = parseInt(hex,16), rgb = [(n>>16)&255,(n>>8)&255,n&255];
+  function f(c){ c/=255; return c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4); }
+  return 0.2126*f(rgb[0]) + 0.7152*f(rgb[1]) + 0.0722*f(rgb[2]);
+}
+function contrastRatio(h1,h2){
+  var l1=relLum(h1), l2=relLum(h2), a=Math.max(l1,l2), b=Math.min(l1,l2);
+  return (a+0.05)/(b+0.05);
+}
+function computeGate(scene){
+  var rows = [], objs = scene.objs;
+  var boxes = objs.filter(function(o){ return o.type==='box'; });
+  var texts = objs.filter(function(o){ return o.type==='text'; });
+
+  var worst = 0;
+  objs.filter(function(o){ return o.type!=='icon' && !o.placeholder; }).forEach(function(o){
+    var over = Math.max(0, (o.x+o.w)-G.SAFE.right, G.SAFE.left-o.x, (o.y+o.h)-G.SAFE.bottom, G.SAFE.top-o.y);
+    if(over>worst) worst = over;
+  });
+  rows.push(worst>0.01
+    ? {status:'warn', title:'Satzspiegel verletzt', detail:'Ein Element verlässt den Master-Satzspiegel um Δ '+worst.toFixed(2)+'".'}
+    : {status:'pass', title:'Satzspiegel eingehalten', detail:'Alles bleibt im Satzspiegel des Unternehmensmasters.'});
+
+  // Containment is intentional design (badge on a card, track behind nodes);
+  // only partial overlaps of sibling shapes are a defect.
+  function contains(a,b){
+    return a.x<=b.x+0.01 && a.y<=b.y+0.01 && a.x+a.w>=b.x+b.w-0.01 && a.y+a.h>=b.y+b.h-0.01;
+  }
+  // Texts count too: a rule struck through a headline is the defect that
+  // box-vs-box checking never sees.
+  var collidable = objs.filter(function(o){
+    return (o.type==='box' || o.type==='text') && !o.decor && !o.placeholder;
+  });
+  var maxOv = 0;
+  for(var i=0;i<collidable.length;i++) for(var j=i+1;j<collidable.length;j++){
+    var A = collidable[i], B = collidable[j];
+    if(contains(A,B) || contains(B,A)) continue;
+    var ov = rectsOverlap(A,B);
+    if(ov>maxOv) maxOv = ov;
+  }
+  rows.push(maxOv>0.005
+    ? {status:'warn', title:'Überlappung erkannt', detail:'Zwei Flächen überschneiden sich um Δ '+maxOv.toFixed(2)+' in².'}
+    : {status:'pass', title:'Keine Überlappung', detail:'Flächen berühren sich höchstens an der Kante.'});
+
+  var groups = {}, alignWarn = null;
+  boxes.forEach(function(o){ if(o.peerGroup){ (groups[o.peerGroup]=groups[o.peerGroup]||[]).push(o); } });
+  Object.keys(groups).forEach(function(g){
+    var arr=groups[g], ys=arr.map(function(o){return o.y;}), hs=arr.map(function(o){return o.h;});
+    var dy=Math.max.apply(null,ys)-Math.min.apply(null,ys), dh=Math.max.apply(null,hs)-Math.min.apply(null,hs);
+    if(dy>0.01||dh>0.01) alignWarn={dy:dy,dh:dh};
+  });
+  rows.push(alignWarn
+    ? {status:'warn', title:'Peers nicht bündig', detail:'Oberkanten Δ '+alignWarn.dy.toFixed(2)+'", Höhen Δ '+alignWarn.dh.toFixed(2)+'".'}
+    : {status:'pass', title:'Peers schließen bündig ab', detail:'Gleiche Oberkante und Höhe je Gruppe.'});
+
+  var worstRatio = 99;
+  texts.forEach(function(t){
+    var bg = 'FFFFFF';
+    boxes.forEach(function(b){
+      if(t.x>=b.x-0.01 && t.y>=b.y-0.01 && (t.x+t.w)<=(b.x+b.w+0.01) && (t.y+t.h)<=(b.y+b.h+0.01)) bg = b.fill.hex;
+    });
+    var ratio = contrastRatio(t.color.hex, bg);
+    var large = t.fontSize>=18 || (t.bold && t.fontSize>=14);
+    if(ratio < (large?3:4.5) && ratio<worstRatio) worstRatio = ratio;
+  });
+  rows.push(worstRatio<99
+    ? {status:'warn', title:'Kontrast zu niedrig', detail:'Schwächster Text erreicht nur '+worstRatio.toFixed(1)+':1 (nötig 4,5:1).'}
+    : {status:'pass', title:'Kontrast ausreichend', detail:'Alle Textfarben erreichen den WCAG-Mindestwert.'});
+
+  return rows;
+}
+
+// ---------- OOXML generation ----------
+var EMU = 914400;
+function emu(inch){ return Math.round(inch*EMU); }
+function xesc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/\r/g,'');
+}
+// A color is {role, hex}: prefer the master's theme role so the deck follows
+// the corporate theme; fall back to a literal hex when there is no role.
+function fillClr(c){
+  if(c && c.role) return '<a:schemeClr val="'+c.role+'"/>';
+  return '<a:srgbClr val="'+((c&&c.hex)||'000000')+'"/>';
+}
+function xfrm(o){
+  return '<a:xfrm><a:off x="'+emu(o.x)+'" y="'+emu(o.y)+'"/><a:ext cx="'+emu(Math.max(o.w,0.01))+'" cy="'+emu(Math.max(o.h,0.01))+'"/></a:xfrm>';
+}
+function geomFor(o){
+  if(o.radius && o.radius>0){
+    var adj = Math.round(Math.min(0.5, o.radius/Math.min(o.w,o.h))*100000);
+    return '<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val '+adj+'"/></a:avLst></a:prstGeom>';
+  }
+  return '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>';
+}
+function boxXml(o,id){
+  var ln = o.lineW ? '<a:ln w="'+Math.round(o.lineW*12700)+'"><a:solidFill>'+fillClr(o.line||o.fill)+'</a:solidFill></a:ln>' : '<a:ln><a:noFill/></a:ln>';
+  return '<p:sp><p:nvSpPr><p:cNvPr id="'+id+'" name="'+xesc(o.id||('Form '+id))+'"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>'
+    + '<p:spPr>'+xfrm(o)+geomFor(o)+'<a:solidFill>'+fillClr(o.fill)+'</a:solidFill>'+ln+'</p:spPr>'
+    + '<p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="de-DE"/></a:p></p:txBody></p:sp>';
+}
+function runsXml(o){
+  var lines = String(o.value==null?'':o.value).split('\n');
+  var algn = o.align==='center' ? 'ctr' : (o.align==='right' ? 'r' : 'l');
+  return lines.map(function(line){
+    var pPr = '<a:pPr algn="'+algn+'"><a:lnSpc><a:spcPct val="'+Math.round((o.leading||1.2)*100000)+'"/></a:lnSpc></a:pPr>';
+    if(line === '') return '<a:p>'+pPr+'<a:endParaRPr lang="de-DE" sz="'+Math.round(o.fontSize*100)+'"/></a:p>';
+    return '<a:p>'+pPr+'<a:r><a:rPr lang="de-DE" sz="'+Math.round(o.fontSize*100)+'" b="'+(o.bold?1:0)+'" dirty="0">'
+      + '<a:solidFill>'+fillClr(o.color)+'</a:solidFill>'
+      + '<a:latin typeface="'+(o.bold?'+mj-lt':'+mn-lt')+'"/></a:rPr>'
+      + '<a:t xml:space="preserve">'+xesc(line)+'</a:t></a:r></a:p>';
+  }).join('');
+}
+function textXml(o,id){
+  var anchor = o.valign==='mid' ? 'ctr' : 't';
+  // A title marked as placeholder inherits position and styling from the layout,
+  // so it stays a real PowerPoint title (outline, master-driven formatting).
+  if(o.placeholder === 'title'){
+    return '<p:sp><p:nvSpPr><p:cNvPr id="'+id+'" name="Titel '+id+'"/>'
+      + '<p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr>'
+      + '<p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/>'
+      + String(o.value).split('\n').map(function(line){
+          return '<a:p><a:r><a:rPr lang="de-DE" dirty="0"/><a:t xml:space="preserve">'+xesc(line)+'</a:t></a:r></a:p>';
+        }).join('')
+      + '</p:txBody></p:sp>';
+  }
+  return '<p:sp><p:nvSpPr><p:cNvPr id="'+id+'" name="'+xesc(o.id||('Text '+id))+'"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr>'
+    + '<p:spPr>'+xfrm(o)+'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>'
+    + '<p:txBody><a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" anchor="'+anchor+'"><a:noAutofit/></a:bodyPr>'
+    + '<a:lstStyle/>'+runsXml(o)+'</p:txBody></p:sp>';
+}
+function strokeShape(id,name,x,y,w,h,geom,color,flipV){
+  return '<p:sp><p:nvSpPr><p:cNvPr id="'+id+'" name="'+xesc(name)+'"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>'
+    + '<p:spPr><a:xfrm'+(flipV?' flipV="1"':'')+'><a:off x="'+emu(x)+'" y="'+emu(y)+'"/><a:ext cx="'+emu(Math.max(w,0.008))+'" cy="'+emu(Math.max(h,0.008))+'"/></a:xfrm>'
+    + geom + '<a:noFill/>'
+    + '<a:ln w="19050" cap="rnd"><a:solidFill>'+fillClr(color)+'</a:solidFill><a:round/></a:ln></p:spPr>'
+    + '<p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="de-DE"/></a:p></p:txBody></p:sp>';
+}
+function iconXml(o, startId){
+  var ops = ICONS[o.name]||ICONS.check, s = o.w/24, out = [], id = startId;
+  ops.forEach(function(op,k){
+    if(op.op==='line'){
+      var X1=o.x+op.x1*s, Y1=o.y+op.y1*s, X2=o.x+op.x2*s, Y2=o.y+op.y2*s;
+      out.push(strokeShape(id++, o.name+'-l'+k, Math.min(X1,X2), Math.min(Y1,Y2),
+        Math.abs(X2-X1), Math.abs(Y2-Y1),
+        '<a:prstGeom prst="line"><a:avLst/></a:prstGeom>', o.color, (Y2<Y1)!==(X2<X1) ? true : false));
+    } else if(op.op==='circle'){
+      var cx=o.x+op.cx*s, cy=o.y+op.cy*s, r=op.r*s;
+      out.push(strokeShape(id++, o.name+'-c'+k, cx-r, cy-r, r*2, r*2,
+        '<a:prstGeom prst="ellipse"><a:avLst/></a:prstGeom>', o.color, false));
+    } else if(op.op==='rect'){
+      var rw=op.w*s, rh=op.h*s;
+      var adj = op.rx ? Math.round(Math.min(0.5, (op.rx*s)/Math.min(rw,rh))*100000) : 0;
+      var geom = op.rx
+        ? '<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val '+adj+'"/></a:avLst></a:prstGeom>'
+        : '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>';
+      out.push(strokeShape(id++, o.name+'-r'+k, o.x+op.x*s, o.y+op.y*s, rw, rh, geom, o.color, false));
+    }
+  });
+  // One group per icon, so it moves and scales as a single object in PowerPoint.
+  var gx = emu(o.x), gy = emu(o.y), gw = emu(o.w), gh = emu(o.h);
+  var xml = '<p:grpSp><p:nvGrpSpPr><p:cNvPr id="'+(id++)+'" name="Piktogramm '+xesc(o.name)+'"/>'
+    + '<p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>'
+    + '<p:grpSpPr><a:xfrm><a:off x="'+gx+'" y="'+gy+'"/><a:ext cx="'+gw+'" cy="'+gh+'"/>'
+    + '<a:chOff x="'+gx+'" y="'+gy+'"/><a:chExt cx="'+gw+'" cy="'+gh+'"/></a:xfrm></p:grpSpPr>'
+    + out.join('') + '</p:grpSp>';
+  return { xml: xml, nextId: id };
+}
+function buildSlideXml(scene){
+  var id = 2, parts = [];
+  scene.objs.forEach(function(o){
+    if(o.type==='box'){ parts.push(boxXml(o,id++)); }
+    else if(o.type==='text'){ parts.push(textXml(o,id++)); }
+    else if(o.type==='icon'){ var r = iconXml(o,id); parts.push(r.xml); id = r.nextId; }
+  });
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+    + '<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"'
+    + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"'
+    + ' xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">'
+    + '<p:cSld><p:spTree>'
+    + '<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>'
+    + '<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>'
+    + parts.join('')
+    + '</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>';
+}
+
+// ---------- master parsing ----------
+function parseTheme(themeXml){
+  var theme = { name:'', colors:{}, fonts:{} };
+  var nm = themeXml.match(/name="([^"]*)"/);
+  theme.name = nm ? nm[1] : '';
+  var cs = themeXml.match(/<a:clrScheme[\s\S]*?<\/a:clrScheme>/);
+  if(cs){
+    ['dk1','lt1','dk2','lt2','accent1','accent2','accent3','accent4','accent5','accent6'].forEach(function(role){
+      var m = cs[0].match(new RegExp('<a:'+role+'>([\\s\\S]*?)</a:'+role+'>'));
+      if(m){
+        var c = m[1].match(/(?:srgbClr val="|lastClr=")([0-9A-Fa-f]{6})/);
+        if(c) theme.colors[role] = c[1].toUpperCase();
       }
     });
   }
-
-  // ---------- geometry helpers ----------
-  function T(id,x,y,w,h,value,fontSize,opts){
-    opts = opts||{};
-    return { id:id, type:'text', x:x, y:y, w:w, h:h, value:value, fontSize:fontSize,
-      bold:!!opts.bold, color:opts.color||'14161A', align:opts.align||'left',
-      valign:opts.valign||'top', leading:opts.leading||1.2, mono:!!opts.mono };
-  }
-  function Bx(id,x,y,w,h,opts){
-    opts = opts||{};
-    return { id:id, type:'box', x:x, y:y, w:w, h:h, fill:opts.fill||'FFFFFF',
-      line:opts.line||opts.fill||'FFFFFF', lineW:opts.lineW||0, radius:opts.radius||0, peerGroup:opts.peerGroup };
-  }
-  function Ic(id,name,x,y,size,color){ return { id:id, type:'icon', name:name, x:x, y:y, w:size, h:size, color:color }; }
-  function iconName(n){ return ICONS[n] ? n : 'check'; }
-
-  // ---------- templates: content in, objects out ----------
-  var TEMPLATES = {
-    cover: {
-      label:'Cover',
-      defaultContent:{
-        eyebrow:'GRID ENGINE · PROTOTYP',
-        title:'Von der Chat-Antwort\nzur Boardroom-Folie',
-        subtitle:'Ein Raster ersetzt geratene Koordinaten. Dieselbe Objektliste füllt HTML-Vorschau und PPTX-Export.',
-        badge:['12 SPALTEN','0.5" RAND','0.2" GUTTER','6 ZEILEN']
-      },
-      build:function(c, CI){
-        var objs = [
-          T('eyebrow', colX(0), MARGIN, colW(7), 0.28, c.eyebrow, 10.5, {bold:true, color:CI.accent, mono:true}),
-          T('title', colX(0), MARGIN+0.42, colW(8), 1.15, c.title, 28, {bold:true, color:CI.ink, leading:1.15}),
-          T('sub', colX(0), CONTENT_TOP, colW(7), 0.95, c.subtitle, 13, {color:CI.muted}),
-          Bx('rule', colX(0), CONTENT_TOP-0.16, 0.55, 0.035, {fill:CI.accent2}),
-          Bx('panel', colX(8), CONTENT_TOP, colW(4), CONTENT_BOTTOM-CONTENT_TOP, {fill:CI.accent, radius:0.16}),
-          T('panelTxt', colX(8)+0.22, CONTENT_TOP+0.24, colW(4)-0.44, CONTENT_BOTTOM-CONTENT_TOP-0.48, (c.badge||[]).join('\n'), 12.5, {bold:true, color:CI.onAccent, leading:1.7, mono:true})
-        ];
-        return { bg:'FFFFFF', objs:objs };
-      }
-    },
-    agenda: {
-      label:'Agenda',
-      defaultContent:{
-        title:'Agenda',
-        items:[
-          {label:'Ausgangslage: V62-Preview'},
-          {label:'Diagnose: Freihand statt Raster'},
-          {label:'Raster-Engine im Test'},
-          {label:'Rollout-Plan'}
-        ]
-      },
-      build:function(c, CI){
-        var objs = [ T('title', colX(0), MARGIN+0.35, colW(12), 0.6, c.title, 24, {bold:true, color:CI.ink}) ];
-        var n = (c.items||[]).length || 1, stepH = Math.min(1.0, (CONTENT_BOTTOM-CONTENT_TOP)/n);
-        (c.items||[]).forEach(function(item,i){
-          var y = CONTENT_TOP + i*stepH;
-          objs.push(Bx('num'+i, colX(0), y, 0.5, 0.5, {fill:CI.accent, radius:0.25}));
-          objs.push(T('numTxt'+i, colX(0), y+0.02, 0.5, 0.46, String(i+1).padStart(2,'0'), 13, {bold:true, color:CI.onAccent, align:'center', valign:'mid'}));
-          objs.push(T('lbl'+i, colX(0)+0.72, y, colW(12)-0.9, 0.5, item.label, 14, {color:CI.ink, valign:'mid'}));
-        });
-        return { bg:'FFFFFF', objs:objs };
-      }
-    },
-    kpi: {
-      label:'Kennzahlen',
-      defaultContent:{
-        lead:'Qualität entsteht nicht durch Nachbessern am Bildschirm, sondern durch ein Raster, das Abweichungen gar nicht erst zulässt.',
-        kpis:[
-          {value:'6', label:'erweiterbare Vorlagen in der Registry', icon:'layers'},
-          {value:'2', label:'austauschbare CI-Sets', icon:'target'},
-          {value:'0', label:'externe Assets in dieser Datei', icon:'check'}
-        ]
-      },
-      build:function(c, CI){
-        var objs = [ T('lead', colX(0), CONTENT_TOP, colW(12), 0.8, c.lead, 14.5, {color:CI.ink}) ];
-        var kpis = c.kpis||[], n = kpis.length||1, span = 12/n;
-        var kpiY = CONTENT_TOP+0.8+0.3, kpiH = 2.0;
-        kpis.forEach(function(k,i){
-          var x = colX(i*span), w = colW(span);
-          objs.push(Bx('card'+i, x, kpiY, w, kpiH, {fill:CI.surface, line:CI.line, lineW:1, radius:0.12, peerGroup:'kpi'}));
-          if(k.icon){
-            objs.push(Bx('ibadge'+i, x+0.2, kpiY+0.2, 0.5, 0.5, {fill:'FFFFFF', line:CI.line, lineW:1, radius:0.25}));
-            objs.push(Ic('icon'+i, iconName(k.icon), x+0.33, kpiY+0.33, 0.24, CI.accent));
-          }
-          objs.push(T('val'+i, x+0.2, kpiY+0.85, w-0.4, 0.6, k.value, 28, {bold:true, color:CI.accent}));
-          objs.push(T('lbl'+i, x+0.2, kpiY+1.48, w-0.4, 0.48, k.label, 10.5, {color:CI.muted}));
-        });
-        return { bg:'FFFFFF', objs:objs };
-      }
-    },
-    split: {
-      label:'Vergleich',
-      defaultContent:{
-        title:'Freihand vs. Raster-Engine',
-        left:{ label:'Freihand — Ist-Zustand', icon:'trending-up', items:['Koordinaten pro Objekt geschätzt','Ränder wandern von Folie zu Folie','Kein Kontrast-/Abstands-Check'] },
-        right:{ label:'Raster-Engine — Vorschlag', icon:'check', items:['12-Spalten-Raster, fixer Gutter','Vorlagen bekommen Inhalt, keine Koordinaten','Gate prüft Rand, Überlappung, Kontrast'] }
-      },
-      build:function(c, CI){
-        var objs = [ T('title', colX(0), MARGIN+0.35, colW(12), 0.6, c.title, 22, {bold:true, color:CI.ink}) ];
-        var cols = [ {startCol:0, data:c.left, tint:CI.line}, {startCol:6, data:c.right, tint:CI.accent2} ];
-        cols.forEach(function(col){
-          var x = colX(col.startCol), w = colW(6);
-          objs.push(Ic('hIcon'+col.startCol, iconName(col.data.icon), x, CONTENT_TOP+0.02, 0.3, col.tint));
-          objs.push(T('head'+col.startCol, x+0.42, CONTENT_TOP, w-0.42, 0.4, col.data.label, 13.5, {bold:true, color:CI.ink}));
-          var rowY = CONTENT_TOP+0.6, rowH = 0.62;
-          (col.data.items||[]).forEach(function(item,i){
-            objs.push(T('b'+col.startCol+i, x, rowY+i*rowH, w, rowH-0.08, '— '+item, 12, {color:CI.muted, leading:1.3}));
-          });
-        });
-        return { bg:'FFFFFF', objs:objs };
-      }
-    },
-    timeline: {
-      label:'Prozess',
-      defaultContent:{
-        title:'Rollout-Prozess',
-        steps:[
-          {label:'Engine definieren', icon:'layers'},
-          {label:'Content statt Koordinaten', icon:'users'},
-          {label:'Vorschau redigieren', icon:'trending-up'},
-          {label:'Identischer Export', icon:'check'}
-        ]
-      },
-      build:function(c, CI){
-        var objs = [ T('title', colX(0), MARGIN+0.35, colW(12), 0.6, c.title, 22, {bold:true, color:CI.ink}) ];
-        var steps = c.steps||[], n = steps.length||1;
-        var segW = colW(12)/n, nodeY = CONTENT_TOP+0.6, nodeSize=0.85;
-        objs.push(Bx('line', colX(0)+nodeSize/2, nodeY+nodeSize/2-0.015, colW(12)-nodeSize, 0.03, {fill:CI.line}));
-        steps.forEach(function(s,i){
-          var cx = colX(0) + segW*(i+0.5);
-          objs.push(Bx('node'+i, cx-nodeSize/2, nodeY, nodeSize, nodeSize, {fill:CI.accent2, radius:nodeSize/2}));
-          objs.push(Ic('nicon'+i, iconName(s.icon), cx-nodeSize*0.24, nodeY+nodeSize*0.26, nodeSize*0.48, CI.onAccent));
-          objs.push(T('nlbl'+i, cx-segW/2+0.1, nodeY+nodeSize+0.16, segW-0.2, 0.7, s.label, 11, {color:CI.ink, align:'center'}));
-        });
-        return { bg:'FFFFFF', objs:objs };
-      }
-    },
-    closing: {
-      label:'Abschluss',
-      defaultContent:{
-        title:'Bereit zum Testen',
-        subtitle:'Gleiche Objektliste, gleiches Raster, gleicher Export.',
-        cta:'Content-JSON links anpassen und exportieren'
-      },
-      build:function(c, CI){
-        var objs = [
-          T('title', colX(0), CONTENT_TOP+0.3, colW(9), 0.7, c.title, 27, {bold:true, color:CI.ink}),
-          T('sub', colX(0), CONTENT_TOP+1.05, colW(8), 0.6, c.subtitle, 14, {color:CI.muted}),
-          Bx('cta', colX(0), CONTENT_TOP+1.85, 4.7, 0.55, {fill:CI.accent, radius:0.28}),
-          T('ctaTxt', colX(0)+0.24, CONTENT_TOP+1.85, 4.7-0.48, 0.55, c.cta, 12, {bold:true, color:CI.onAccent, valign:'mid'}),
-          Bx('badge', colX(9.3), CONTENT_TOP+0.5, 1.9, 1.9, {fill:CI.accent2, radius:0.95}),
-          Ic('badgeIcon', 'check', colX(9.3)+0.65, CONTENT_TOP+0.5+0.65, 0.6, CI.onAccent)
-        ];
-        return { bg:'FFFFFF', objs:objs };
-      }
-    }
+  // slide-context names via the standard colour map
+  var c = theme.colors;
+  theme.colors = {
+    tx1:c.dk1||'000000', bg1:c.lt1||'FFFFFF', tx2:c.dk2||'E20074', bg2:c.lt2||'A3A3A3',
+    accent1:c.accent1||'32B9AF', accent2:c.accent2||'A4DEEE', accent3:c.accent3||'ECCCBF',
+    accent4:c.accent4||'F0E68C', accent5:c.accent5||'00A8E6', accent6:c.accent6||'6E648C'
   };
-  var TPL_ORDER = ['cover','agenda','kpi','split','timeline','closing'];
-  var contentState = {};
-  TPL_ORDER.forEach(function(k){ contentState[k] = JSON.parse(JSON.stringify(TEMPLATES[k].defaultContent)); });
-  var activeTpl = 'cover';
+  var fs = themeXml.match(/<a:fontScheme[\s\S]*?<\/a:fontScheme>/);
+  if(fs){
+    var mj = fs[0].match(/<a:majorFont>\s*<a:latin typeface="([^"]*)"/);
+    var mn = fs[0].match(/<a:minorFont>\s*<a:latin typeface="([^"]*)"/);
+    theme.fonts = { major: mj?mj[1]:'', minor: mn?mn[1]:'' };
+  }
+  return theme;
+}
+function parseLayoutName(layoutXml){
+  var m = layoutXml.match(/<p:cSld[^>]*name="([^"]*)"/);
+  return m ? m[1] : '';
+}
 
-  // ---------- render ----------
+// ---------- master injection ----------
+// Writes the generated slides into the ORIGINAL master package, so the result
+// keeps its theme, all layouts, fonts, footers and slide numbers.
+async function injectIntoMaster(JSZip, masterData, scenes){
+  var zip = await JSZip.loadAsync(masterData);
+
+  // map layout name -> part name
+  var layouts = {};
+  var layoutFiles = Object.keys(zip.files).filter(function(p){ return /^ppt\/slideLayouts\/slideLayout\d+\.xml$/.test(p); });
+  for(var i=0;i<layoutFiles.length;i++){
+    var lx = await zip.file(layoutFiles[i]).async('string');
+    layouts[parseLayoutName(lx)] = layoutFiles[i];
+  }
+
+  // drop the master file's own sample slides and their notes
+  Object.keys(zip.files).forEach(function(p){
+    if(/^ppt\/slides\/slide\d+\.xml$/.test(p) || /^ppt\/slides\/_rels\/slide\d+\.xml\.rels$/.test(p)
+       || /^ppt\/notesSlides\//.test(p)) zip.remove(p);
+  });
+
+  var ct = await zip.file('[Content_Types].xml').async('string');
+  ct = ct.replace(/<Override PartName="\/ppt\/slides\/slide\d+\.xml"[^>]*\/>/g, '')
+         .replace(/<Override PartName="\/ppt\/notesSlides\/[^"]*"[^>]*\/>/g, '');
+
+  var prels = await zip.file('ppt/_rels/presentation.xml.rels').async('string');
+  prels = prels.replace(/<Relationship[^>]*Target="slides\/slide\d+\.xml"[^>]*\/>/g, '');
+  var maxRid = 0;
+  prels.replace(/Id="rId(\d+)"/g, function(_,n){ maxRid = Math.max(maxRid, parseInt(n,10)); return _; });
+
+  var sldIds = [], ctAdds = [], relAdds = [];
+  for(var s=0;s<scenes.length;s++){
+    var scene = scenes[s], n = s+1;
+    var layoutPart = layouts[scene.layoutName] || layouts['Leer'] || layoutFiles[0];
+    var rid = 'rId' + (maxRid + 1 + s);
+
+    zip.file('ppt/slides/slide'+n+'.xml', buildSlideXml(scene));
+    zip.file('ppt/slides/_rels/slide'+n+'.xml.rels',
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+      + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../'
+      + layoutPart.replace('ppt/','') + '"/></Relationships>');
+
+    ctAdds.push('<Override PartName="/ppt/slides/slide'+n+'.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>');
+    relAdds.push('<Relationship Id="'+rid+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide'+n+'.xml"/>');
+    sldIds.push('<p:sldId id="'+(256+s)+'" r:id="'+rid+'"/>');
+  }
+
+  zip.file('[Content_Types].xml', ct.replace('</Types>', ctAdds.join('')+'</Types>'));
+  zip.file('ppt/_rels/presentation.xml.rels', prels.replace('</Relationships>', relAdds.join('')+'</Relationships>'));
+
+  var pres = await zip.file('ppt/presentation.xml').async('string');
+  pres = pres.replace(/<p:sldIdLst>[\s\S]*?<\/p:sldIdLst>/, '<p:sldIdLst>'+sldIds.join('')+'</p:sldIdLst>');
+  zip.file('ppt/presentation.xml', pres);
+
+  // Media that only the removed sample slides referenced would otherwise stay
+  // behind as orphans, which PowerPoint reports as a damaged file.
+  var relFiles = Object.keys(zip.files).filter(function(p){ return /\.rels$/.test(p); });
+  var referenced = {};
+  for(var r=0;r<relFiles.length;r++){
+    var rx = await zip.file(relFiles[r]).async('string');
+    (rx.match(/Target="[^"]*media\/[^"]+"/g)||[]).forEach(function(t){
+      referenced[t.replace(/.*media\//,'').replace(/"$/,'')] = true;
+    });
+  }
+  Object.keys(zip.files).forEach(function(p){
+    var m = p.match(/^ppt\/media\/(.+)$/);
+    if(m && !referenced[m[1]]) zip.remove(p);
+  });
+
+  return zip;
+}
+
+var API = { G:G, colX:colX, colW:colW, DEFAULT_THEME:DEFAULT_THEME, paletteFor:paletteFor,
+  ICONS:ICONS, svgFor:svgFor, iconName:iconName, TEMPLATES:TEMPLATES, TPL_ORDER:TPL_ORDER,
+  buildScene:buildScene, computeGate:computeGate, contrastRatio:contrastRatio,
+  buildSlideXml:buildSlideXml, injectIntoMaster:injectIntoMaster,
+  parseTheme:parseTheme, parseLayoutName:parseLayoutName };
+
+if(typeof module !== 'undefined' && module.exports){ module.exports = API; }
+root.StoryCraft = API;
+
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+/* === eingebetteter Unternehmensmaster === */
+var MASTER_B64 = "";
+</script>
+<script>
+(function(){
+  "use strict";
+  var E = window.StoryCraft;
+  var G = E.G;
+
+  var THEME = E.DEFAULT_THEME;
+  var masterData = null;
+  var layoutNames = [];
+  var contentState = {}, layoutState = {};
+  E.TPL_ORDER.forEach(function(k){
+    contentState[k] = JSON.parse(JSON.stringify(E.TEMPLATES[k].defaultContent));
+    layoutState[k] = E.TEMPLATES[k].layout;
+  });
+  var activeTpl = 'cover';
+  var currentScene = null;
+
+  function pct(v,total){ return (v/total*100).toFixed(3)+'%'; }
+  function b64ToBytes(b64){
+    var bin = atob(b64), len = bin.length, out = new Uint8Array(len);
+    for(var i=0;i<len;i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  // ---------- master ----------
+  async function loadMaster(data, label){
+    if(typeof JSZip === 'undefined') throw new Error('JSZip nicht geladen');
+    var zip = await JSZip.loadAsync(data);
+    var themeFile = zip.file('ppt/theme/theme1.xml');
+    if(!themeFile) throw new Error('Kein Theme im Paket gefunden');
+    THEME = E.parseTheme(await themeFile.async('string'));
+    layoutNames = [];
+    var paths = Object.keys(zip.files).filter(function(p){ return /^ppt\/slideLayouts\/slideLayout\d+\.xml$/.test(p); })
+      .sort(function(a,b){ return parseInt(a.match(/(\d+)/)[1],10) - parseInt(b.match(/(\d+)/)[1],10); });
+    for(var i=0;i<paths.length;i++){
+      layoutNames.push(E.parseLayoutName(await zip.file(paths[i]).async('string')));
+    }
+    masterData = data;
+    document.getElementById('masterName').textContent = THEME.name || label;
+    document.getElementById('masterMeta').textContent =
+      layoutNames.length + ' Layouts · ' + (THEME.fonts.minor||'—') + ' · Magenta ' + THEME.colors.tx2 + ' · Petrol ' + THEME.colors.accent1;
+    document.body.style.setProperty('--font-slide', '"'+(THEME.fonts.minor||'Segoe UI')+'","Segoe UI",Arial,sans-serif');
+    fillLayoutSelect();
+    draw();
+  }
+  function fillLayoutSelect(){
+    var sel = document.getElementById('layoutSelect');
+    sel.innerHTML = '';
+    var names = layoutNames.length ? layoutNames : [E.TEMPLATES[activeTpl].layout];
+    names.forEach(function(n){
+      var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o);
+    });
+    sel.value = layoutState[activeTpl];
+    if(sel.selectedIndex < 0 && names.length) sel.value = names[0];
+  }
+
+  // ---------- preview ----------
   function renderScene(scene){
     var frame = document.getElementById('frame');
     var overlay = document.getElementById('gridOverlay');
     Array.prototype.slice.call(frame.querySelectorAll('.obj')).forEach(function(n){ n.remove(); });
-    frame.style.background = '#'+scene.bg;
     scene.objs.forEach(function(o){
       var d = document.createElement('div');
-      d.className = 'obj' + (o.mono ? ' mono-text' : '') + (o.type==='icon' ? ' icon-obj' : '');
-      d.style.left = pct(o.x, CANVAS_W); d.style.top = pct(o.y, CANVAS_H);
-      d.style.width = pct(o.w, CANVAS_W); d.style.height = pct(o.h, CANVAS_H);
-      if(o.type === 'box'){
-        d.style.background = '#'+o.fill;
-        d.style.border = (o.lineW||0) + 'px solid #' + (o.line||o.fill);
-        d.style.borderRadius = 'calc(var(--pxpi,60) * 1px * ' + (o.radius||0) + ')';
-      } else if(o.type === 'text'){
+      d.className = 'obj' + (o.type==='icon' ? ' icon-obj' : '');
+      d.style.left = pct(o.x,G.W); d.style.top = pct(o.y,G.H);
+      d.style.width = pct(o.w,G.W); d.style.height = pct(o.h,G.H);
+      if(o.type==='box'){
+        d.style.background = '#'+o.fill.hex;
+        d.style.border = (o.lineW||0)+'px solid #'+((o.line||o.fill).hex);
+        d.style.borderRadius = 'calc(var(--pxpi,60) * 1px * '+(o.radius||0)+')';
+      } else if(o.type==='text'){
         d.dataset.check = 'overflow';
-        d.style.fontSize = 'calc(var(--pxpi,60) * 1px * ' + (o.fontSize/72) + ')';
+        d.style.fontSize = 'calc(var(--pxpi,60) * 1px * '+(o.fontSize/72)+')';
         d.style.fontWeight = o.bold ? '700' : '400';
-        d.style.color = '#'+o.color;
+        d.style.color = '#'+o.color.hex;
         d.style.lineHeight = String(o.leading||1.2);
         d.style.textAlign = o.align||'left';
         d.style.display = 'flex';
         d.style.alignItems = o.valign==='mid' ? 'center' : 'flex-start';
         d.style.justifyContent = o.align==='center' ? 'center' : (o.align==='right' ? 'flex-end' : 'flex-start');
         d.textContent = o.value||'';
-      } else if(o.type === 'icon'){
-        d.innerHTML = svgFor(o.name, o.color);
+      } else if(o.type==='icon'){
+        d.innerHTML = E.svgFor(o.name, o.color.hex);
       }
       frame.appendChild(d);
     });
     frame.appendChild(overlay);
-    var w = frame.clientWidth;
-    frame.style.setProperty('--pxpi', (w/CANVAS_W).toFixed(3));
-    renderGridOverlay(overlay);
+    frame.style.setProperty('--pxpi', (frame.clientWidth/G.W).toFixed(3));
+    renderOverlay(overlay);
   }
-  function renderGridOverlay(overlay){
+  function renderOverlay(overlay){
     overlay.innerHTML = '';
-    var margin = document.createElement('div');
-    margin.className = 'margin';
-    margin.style.left = pct(MARGIN, CANVAS_W); margin.style.top = pct(MARGIN, CANVAS_H);
-    margin.style.right = pct(MARGIN, CANVAS_W); margin.style.bottom = pct(MARGIN, CANVAS_H);
-    overlay.appendChild(margin);
-    for(var c=0;c<COLS;c++){
+    var safe = document.createElement('div');
+    safe.className = 'safe';
+    safe.style.left = pct(G.SAFE.left,G.W); safe.style.top = pct(G.SAFE.top,G.H);
+    safe.style.right = pct(G.W-G.SAFE.right,G.W); safe.style.bottom = pct(G.H-G.SAFE.bottom,G.H);
+    overlay.appendChild(safe);
+    var zone = document.createElement('div');
+    zone.className = 'zone';
+    zone.style.left = pct(G.TITLE.x,G.W); zone.style.top = pct(G.TITLE.y,G.H);
+    zone.style.width = pct(G.TITLE.w,G.W); zone.style.height = pct(G.TITLE.h,G.H);
+    overlay.appendChild(zone);
+    for(var c=0;c<G.COLS;c++){
       var col = document.createElement('div');
       col.className = 'col';
-      col.style.left = pct(colX(c), CANVAS_W); col.style.width = pct(COLW, CANVAS_W);
+      col.style.left = pct(E.colX(c),G.W); col.style.width = pct(G.COLW,G.W);
       overlay.appendChild(col);
     }
   }
 
-  // ---------- quality gate ----------
-  function hexToRgb(hex){
-    hex = hex.replace('#','');
-    if(hex.length===3) hex = hex.split('').map(function(c){return c+c;}).join('');
-    var n = parseInt(hex,16);
-    return [(n>>16)&255, (n>>8)&255, n&255];
-  }
-  function relLum(rgb){
-    function f(c){ c/=255; return c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4); }
-    return 0.2126*f(rgb[0]) + 0.7152*f(rgb[1]) + 0.0722*f(rgb[2]);
-  }
-  function contrastRatio(hex1, hex2){
-    var l1 = relLum(hexToRgb(hex1)), l2 = relLum(hexToRgb(hex2));
-    var a = Math.max(l1,l2), b = Math.min(l1,l2);
-    return (a+0.05)/(b+0.05);
-  }
-  function rectsOverlap(a,b){
-    var ox = Math.min(a.x+a.w,b.x+b.w) - Math.max(a.x,b.x);
-    var oy = Math.min(a.y+a.h,b.y+b.h) - Math.max(a.y,b.y);
-    return (ox>0 && oy>0) ? ox*oy : 0;
-  }
-  function computeGate(scene){
-    var rows = [];
-    var boxes = scene.objs.filter(function(o){ return o.type==='box'; });
-    var texts = scene.objs.filter(function(o){ return o.type==='text'; });
-
-    var eps=0.01, worst=0;
-    boxes.forEach(function(o){
-      var over = Math.max(0, (o.x+o.w)-(CANVAS_W-MARGIN), MARGIN-o.x, (o.y+o.h)-(CANVAS_H-MARGIN), MARGIN-o.y);
-      if(over>worst) worst=over;
-    });
-    rows.push(worst>eps
-      ? {status:'warn', title:'Rand verletzt', detail:'Ein Element überschreitet den 0.5"-Rand um Δ '+worst.toFixed(2)+'".'}
-      : {status:'pass', title:'Rand eingehalten', detail:'Alle Formen bleiben innerhalb des 0.5"-Rands.'});
-
-    var maxOverlap=0;
-    for(var i=0;i<boxes.length;i++) for(var j=i+1;j<boxes.length;j++){
-      var ov = rectsOverlap(boxes[i], boxes[j]);
-      if(ov>maxOverlap) maxOverlap=ov;
-    }
-    rows.push(maxOverlap>0.005
-      ? {status:'warn', title:'Überlappung erkannt', detail:'Zwei Flächen überschneiden sich um Δ '+maxOverlap.toFixed(2)+' in².'}
-      : {status:'pass', title:'Keine Überlappung', detail:'Alle Flächen berühren sich höchstens an der Kante.'});
-
-    var groups={};
-    boxes.forEach(function(o){ if(o.peerGroup){ (groups[o.peerGroup]=groups[o.peerGroup]||[]).push(o); } });
-    var alignWarn=null;
-    Object.keys(groups).forEach(function(g){
-      var arr=groups[g], ys=arr.map(function(o){return o.y;}), hs=arr.map(function(o){return o.h;});
-      var dy=Math.max.apply(null,ys)-Math.min.apply(null,ys), dh=Math.max.apply(null,hs)-Math.min.apply(null,hs);
-      if(dy>0.01||dh>0.01) alignWarn={dy:dy,dh:dh};
-    });
-    rows.push(alignWarn
-      ? {status:'warn', title:'Peers nicht bündig', detail:'Oberkanten Δ '+alignWarn.dy.toFixed(2)+'", Höhen Δ '+alignWarn.dh.toFixed(2)+'".'}
-      : {status:'pass', title:'Peers schließen bündig ab', detail:'Gleiche Oberkante und Höhe innerhalb jeder Gruppe.'});
-
-    var worstRatio=99;
-    texts.forEach(function(t){
-      var bg = scene.bg;
-      boxes.forEach(function(b){
-        if(t.x>=b.x-0.01 && t.y>=b.y-0.01 && (t.x+t.w)<=(b.x+b.w+0.01) && (t.y+t.h)<=(b.y+b.h+0.01)) bg=b.fill;
-      });
-      var ratio = contrastRatio('#'+t.color, '#'+bg);
-      var large = t.fontSize>=18 || (t.bold && t.fontSize>=14);
-      var need = large ? 3 : 4.5;
-      if(ratio<need && ratio<worstRatio) worstRatio=ratio;
-    });
-    rows.push(worstRatio<99
-      ? {status:'warn', title:'Kontrast zu niedrig', detail:'Schwächster Text erreicht nur '+worstRatio.toFixed(1)+':1 (WCAG verlangt 4.5:1).'}
-      : {status:'pass', title:'Kontrast ausreichend', detail:'Alle Textfarben erreichen den WCAG-Mindestwert.'});
-
-    rows.push({status:'pending', title:'Text-Overflow', detail:'Wird geprüft…', id:'overflow'});
-    return rows;
-  }
+  // ---------- gate ----------
   function paintGate(rows){
     document.getElementById('qaList').innerHTML = rows.map(function(r){
       var badge = r.status==='pass' ? 'pass' : 'warn';
       var label = r.status==='pass' ? 'PASS' : (r.status==='pending' ? '…' : 'WARN');
-      return '<div class="qa-row" '+(r.id?('data-row-id="'+r.id+'"'):'')+'>'+
-        '<span class="qa-badge '+badge+'">'+label+'</span>'+
-        '<span class="qa-text"><b>'+r.title+'</b><span>'+r.detail+'</span></span></div>';
+      return '<div class="qa-row"'+(r.id?' data-row-id="'+r.id+'"':'')+'>'
+        + '<span class="qa-badge '+badge+'">'+label+'</span>'
+        + '<span class="qa-text"><b>'+r.title+'</b><span>'+r.detail+'</span></span></div>';
     }).join('');
   }
   function updateGateStatus(){
     var warns = document.querySelectorAll('#qaList .qa-badge.warn').length;
-    var statusEl = document.getElementById('gateStatus'), btn = document.getElementById('exportBtn');
+    var statusEl = document.getElementById('gateStatus');
+    var b1 = document.getElementById('exportBtn'), b2 = document.getElementById('exportAllBtn');
+    var noMaster = !masterData;
+    if(noMaster){
+      statusEl.className = 'gate-status blocked';
+      statusEl.textContent = 'Kein Master geladen';
+      b1.disabled = true; b2.disabled = true;
+      return;
+    }
     if(warns>0){
-      statusEl.className='gate-status blocked';
+      statusEl.className = 'gate-status blocked';
       statusEl.textContent = 'Export gesperrt — '+warns+' Prüfung(en) auf WARN';
-      btn.disabled = true;
+      b1.disabled = true; b2.disabled = true;
     } else {
-      statusEl.className='gate-status ready';
+      statusEl.className = 'gate-status ready';
       statusEl.textContent = 'Alle Prüfungen bestanden — Export bereit';
-      btn.disabled = false;
+      b1.disabled = false; b2.disabled = false;
     }
   }
   function checkOverflow(){
@@ -528,129 +864,157 @@ footer.foot{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);fo
           return e.scrollHeight > e.clientHeight+2 || e.scrollWidth > e.clientWidth+2;
         });
         var row = document.querySelector('[data-row-id="overflow"]');
-        if(!row) return;
-        var badge = row.querySelector('.qa-badge'), text = row.querySelector('.qa-text');
-        if(clipped.length){
-          badge.className='qa-badge warn'; badge.textContent='WARN';
-          text.innerHTML = '<b>Text-Overflow</b><span>'+clipped.length+' Textbox(en) potenziell abgeschnitten.</span>';
-        } else {
-          badge.className='qa-badge pass'; badge.textContent='PASS';
-          text.innerHTML = '<b>Text-Overflow</b><span>Keine abgeschnittenen Texte erkannt.</span>';
+        if(row){
+          var badge = row.querySelector('.qa-badge'), text = row.querySelector('.qa-text');
+          if(clipped.length){
+            badge.className='qa-badge warn'; badge.textContent='WARN';
+            text.innerHTML = '<b>Text-Overflow</b><span>'+clipped.length+' Textbox(en) potenziell abgeschnitten.</span>';
+          } else {
+            badge.className='qa-badge pass'; badge.textContent='PASS';
+            text.innerHTML = '<b>Text-Overflow</b><span>Keine abgeschnittenen Texte erkannt.</span>';
+          }
         }
         updateGateStatus();
-      }, 120);
+      }, 130);
     });
   }
 
-  var currentScene = null;
+  function sceneFor(key){
+    var s = E.buildScene(key, contentState[key], THEME);
+    s.layoutName = layoutState[key];
+    return s;
+  }
   function draw(){
-    var CI = CI_SETS[activeCI];
-    var tpl = TEMPLATES[activeTpl];
-    currentScene = tpl.build(contentState[activeTpl], CI);
+    currentScene = sceneFor(activeTpl);
     renderScene(currentScene);
-    var rows = computeGate(currentScene);
+    var rows = E.computeGate(currentScene);
+    rows.push({status:'pending', title:'Text-Overflow', detail:'Wird geprüft…', id:'overflow'});
     paintGate(rows);
     updateGateStatus();
     checkOverflow();
-    document.getElementById('objectPreview').value = JSON.stringify(currentScene.objs.slice(0,4), null, 2) + '\n… ('+currentScene.objs.length+' Objekte gesamt)';
+    document.getElementById('objectPreview').value =
+      JSON.stringify(currentScene.objs.slice(0,3), null, 2) + '\n… (' + currentScene.objs.length + ' Objekte gesamt)';
+    document.getElementById('frameNote').textContent =
+      'Layout „' + currentScene.layoutName + '" · Satzspiegel ' + G.SAFE.left.toFixed(2) + '"–' + G.SAFE.right.toFixed(2)
+      + '" · Titelzone y=' + G.TITLE.y.toFixed(2) + '" · ' + G.COLS + ' Spalten, Gutter ' + G.GUTTER.toFixed(2) + '"';
   }
 
-  // ---------- toolbar wiring ----------
-  var ciSelect = document.getElementById('ciSelect');
-  Object.keys(CI_SETS).forEach(function(k){
-    var opt = document.createElement('option'); opt.value=k; opt.textContent=CI_SETS[k].name; ciSelect.appendChild(opt);
+  // ---------- export ----------
+  var downloadsNS = null;
+  if(window.claude && window.claude.use){
+    window.claude.use('downloads').then(function(ns){ downloadsNS = ns; }).catch(function(){ downloadsNS = null; });
+  }
+  async function deliver(blob, filename, statusEl){
+    if(downloadsNS){
+      try {
+        var res = await downloadsNS.save({ filename: filename, data: blob });
+        statusEl.textContent = res.status === 'saved' ? 'Gespeichert: '+filename : 'Übergeben.';
+        return;
+      } catch(err){
+        statusEl.textContent = (err && err.code === 'declined') ? 'Abgebrochen.' : 'Speichern fehlgeschlagen.';
+        return;
+      }
+    }
+    // Standardweg außerhalb von Claude-Artifacts (ChatGPT-Canvas, lokale Datei)
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    statusEl.textContent = 'Datei erzeugt: '+filename;
+  }
+  async function runExport(scenes, filename){
+    var statusEl = document.getElementById('exportStatusText');
+    if(!masterData){ statusEl.textContent = 'Kein Master geladen.'; return; }
+    statusEl.textContent = 'Schreibe Folien in den Master…';
+    try {
+      var zip = await E.injectIntoMaster(JSZip, masterData, scenes);
+      var blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE',
+        mimeType:'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
+      await deliver(blob, filename, statusEl);
+    } catch(err){
+      statusEl.textContent = 'Export fehlgeschlagen: ' + (err && err.message ? err.message : err);
+    }
+  }
+  document.getElementById('exportBtn').addEventListener('click', function(){
+    runExport([sceneFor(activeTpl)], 'storycraft-'+activeTpl+'.pptx');
   });
-  ciSelect.value = activeCI;
-  ciSelect.addEventListener('change', function(){ activeCI = ciSelect.value; draw(); });
+  document.getElementById('exportAllBtn').addEventListener('click', function(){
+    runExport(E.TPL_ORDER.map(sceneFor), 'storycraft-deck.pptx');
+  });
 
+  // ---------- wiring ----------
   var tplGroup = document.getElementById('tplGroup');
-  TPL_ORDER.forEach(function(k){
+  E.TPL_ORDER.forEach(function(k){
     var btn = document.createElement('button');
     btn.className = 'tpl-btn' + (k===activeTpl ? ' active' : '');
-    btn.textContent = TEMPLATES[k].label;
+    btn.textContent = E.TEMPLATES[k].label;
     btn.dataset.tpl = k;
     btn.addEventListener('click', function(){
       activeTpl = k;
       Array.prototype.forEach.call(tplGroup.children, function(b){ b.classList.toggle('active', b.dataset.tpl===k); });
-      document.getElementById('contentEditor').value = JSON.stringify(contentState[activeTpl], null, 2);
+      document.getElementById('contentEditor').value = JSON.stringify(contentState[k], null, 2);
       document.getElementById('editorErr').textContent = '';
+      fillLayoutSelect();
       draw();
     });
     tplGroup.appendChild(btn);
   });
-
+  document.getElementById('layoutSelect').addEventListener('change', function(e){
+    layoutState[activeTpl] = e.target.value;
+    draw();
+  });
   document.getElementById('gridToggle').addEventListener('change', function(e){
     document.getElementById('gridOverlay').classList.toggle('show', e.target.checked);
   });
-  window.addEventListener('resize', function(){
-    var frame = document.getElementById('frame');
-    frame.style.setProperty('--pxpi', (frame.clientWidth/CANVAS_W).toFixed(3));
-  });
-
-  document.getElementById('iconLegend').innerHTML = Object.keys(ICONS).map(function(n){ return '<span>'+n+'</span>'; }).join('');
-
-  // ---------- content editor ----------
   document.getElementById('applyBtn').addEventListener('click', function(){
     var ta = document.getElementById('contentEditor'), err = document.getElementById('editorErr');
     try {
-      var parsed = JSON.parse(ta.value);
-      contentState[activeTpl] = parsed;
+      contentState[activeTpl] = JSON.parse(ta.value);
       err.textContent = '';
       draw();
-    } catch(e){
-      err.textContent = 'Ungültiges JSON: ' + e.message;
-    }
+    } catch(e){ err.textContent = 'Ungültiges JSON: ' + e.message; }
   });
-
-  // ---------- export ----------
-  var downloadsNS = null;
-  function initDownloads(){
-    if(!(window.claude && window.claude.use)) return;
-    window.claude.use('downloads').then(function(ns){ downloadsNS = ns; }).catch(function(){ downloadsNS=null; });
-  }
-  document.getElementById('exportBtn').addEventListener('click', function(){
-    var statusEl = document.getElementById('exportStatusText');
-    if(typeof PptxGenJS === 'undefined'){ statusEl.textContent='PptxGenJS konnte nicht geladen werden.'; return; }
-    if(!currentScene){ return; }
-    statusEl.textContent = 'Baue Datei…';
-    try {
-      var pptx = new PptxGenJS();
-      pptx.defineLayout({ name:'STORYCRAFT', width: CANVAS_W, height: CANVAS_H });
-      pptx.layout = 'STORYCRAFT';
-      var slide = pptx.addSlide();
-      slide.background = { color: currentScene.bg };
-      currentScene.objs.forEach(function(o){
-        if(o.type==='box'){
-          var opts = { x:o.x, y:o.y, w:o.w, h:o.h, fill:{ color:o.fill } };
-          if(o.lineW) opts.line = { color:o.line||o.fill, width:o.lineW };
-          slide.addShape('rect', opts);
-        } else if(o.type==='text'){
-          slide.addText(o.value||'', {
-            x:o.x, y:o.y, w:o.w, h:o.h, fontFace:'Aptos', fontSize:o.fontSize, bold:!!o.bold,
-            color:o.color, align:o.align||'left', valign: o.valign==='mid' ? 'middle' : 'top'
-          });
-        } else if(o.type==='icon'){
-          addIconToSlide(slide, o.name, o.x, o.y, o.w, o.color);
-        }
+  document.getElementById('masterFile').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0];
+    if(!f) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      loadMaster(new Uint8Array(reader.result), f.name).catch(function(err){
+        document.getElementById('masterName').textContent = 'Master konnte nicht gelesen werden';
+        document.getElementById('masterMeta').textContent = String(err && err.message ? err.message : err);
+        document.getElementById('masterDot').style.background = 'var(--warn)';
       });
-      pptx.write({ outputType:'blob' }).then(function(blob){
-        if(!downloadsNS){ statusEl.textContent='Speichern in dieser Ansicht nicht verfügbar.'; return; }
-        return downloadsNS.save({ filename: 'storycraft-'+activeTpl+'.pptx', data: blob }).then(function(res){
-          statusEl.textContent = res.status==='saved' ? 'Gespeichert.' : 'Übergeben.';
-        });
-      }).catch(function(err){
-        statusEl.textContent = (err && err.code==='declined') ? 'Abgebrochen.' : 'Export fehlgeschlagen.';
-      });
-    } catch(e){ statusEl.textContent = 'Export fehlgeschlagen.'; }
+    };
+    reader.readAsArrayBuffer(f);
   });
+  window.addEventListener('resize', function(){
+    var frame = document.getElementById('frame');
+    frame.style.setProperty('--pxpi', (frame.clientWidth/G.W).toFixed(3));
+  });
+  document.getElementById('iconLegend').innerHTML =
+    Object.keys(E.ICONS).map(function(n){ return '<span>'+n+'</span>'; }).join('');
 
   // ---------- init ----------
   function init(){
     document.getElementById('contentEditor').value = JSON.stringify(contentState[activeTpl], null, 2);
+    fillLayoutSelect();
     draw();
-    initDownloads();
+    if(MASTER_B64 && MASTER_B64.length > 100){
+      loadMaster(b64ToBytes(MASTER_B64), 'Eingebetteter Master').catch(function(err){
+        document.getElementById('masterName').textContent = 'Eingebetteter Master nicht lesbar';
+        document.getElementById('masterMeta').textContent = String(err && err.message ? err.message : err);
+        document.getElementById('masterDot').style.background = 'var(--warn)';
+        updateGateStatus();
+      });
+    } else {
+      document.getElementById('masterName').textContent = 'Kein Master eingebettet';
+      document.getElementById('masterMeta').textContent = 'Bitte Master-Datei laden';
+      document.getElementById('masterDot').style.background = 'var(--warn)';
+      updateGateStatus();
+    }
   }
   if(document.fonts && document.fonts.ready){ document.fonts.ready.then(init); } else { init(); }
-  window.addEventListener('load', function(){ setTimeout(draw, 60); });
+  window.addEventListener('load', function(){ setTimeout(draw, 80); });
 })();
 </script>
