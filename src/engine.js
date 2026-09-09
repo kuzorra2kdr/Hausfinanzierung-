@@ -29,16 +29,33 @@ var DEFAULT_THEME = {
 
 // Palette roles used by the templates. Each entry is a THEME ROLE, so the
 // exported XML can reference the master's theme instead of a frozen hex.
+function mixWhite(hex, w){
+  var n = parseInt(hex,16), r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+  function m(c){ return Math.round(c*(1-w) + 255*w); }
+  return ((1<<24) + (m(r)<<16) + (m(g)<<8) + m(b)).toString(16).slice(1).toUpperCase();
+}
+function darken(hex, f){
+  var n = parseInt(hex,16), r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+  return ((1<<24) + (Math.round(r*f)<<16) + (Math.round(g*f)<<8) + Math.round(b*f)).toString(16).slice(1).toUpperCase();
+}
+// Every role maps to the master's theme where one exists, so a master update
+// pulls the deck along. Tints and text-safe variants are derived, not frozen.
 function paletteFor(theme){
   var c = theme.colors;
   return {
-    ink:      { role:'tx1',     hex:c.tx1 },
-    accent:   { role:'tx2',     hex:c.tx2 },
-    accent2:  { role:'accent1', hex:c.accent1 },
-    muted:    { role:'bg2',     hex:c.bg2 },
-    onAccent: { role:'bg1',     hex:c.bg1 },
-    surface:  { role:null,      hex:'F5F6F7' },
-    line:     { role:null,      hex:'D9DCE0' }
+    ink:            { role:'tx1',     hex:c.tx1 },
+    onAccent:       { role:'bg1',     hex:c.bg1 },
+    accent:         { role:'tx2',     hex:c.tx2 },
+    accentDark:     { role:null,      hex:darken(c.tx2, 0.82) },
+    accent2:        { role:'accent1', hex:c.accent1 },
+    accent2Dark:    { role:null,      hex:darken(c.accent1, 0.55) },
+    soft:           { role:null,      hex:'4B525C' },
+    line:           { role:null,      hex:'D9DCE0' },
+    surface:        { role:null,      hex:'F5F6F7' },
+    surfaceAccent:  { role:null,      hex:mixWhite(c.tx2, 0.94) },
+    surfaceAccent2: { role:null,      hex:mixWhite(c.accent1, 0.90) },
+    accentLine:     { role:null,      hex:mixWhite(c.tx2, 0.72) },
+    accent2Line:    { role:null,      hex:mixWhite(c.accent1, 0.62) }
   };
 }
 
@@ -77,136 +94,285 @@ function Bx(id,x,y,w,h,o){
 function Ic(id,name,x,y,size,color){ return { id:id, type:'icon', name:iconName(name), x:x, y:y, w:size, h:size, color:color }; }
 
 // ---------- templates: content in, objects out ----------
+// One deterministic title fit, used identically by preview and export.
+// This replaces the four measuring engines of v58 that raced each other.
+var TITLE_LEADING = 1.12;
+function fitTitleSize(text, widthIn, maxHeightIn){
+  var sizes = [40,36,32,28,26,24], s = String(text||'');
+  for(var i=0;i<sizes.length;i++){
+    var fs = sizes[i];
+    var perLine = Math.floor(widthIn*72 / (fs*0.52));
+    var lines = Math.max(1, Math.ceil(s.length / Math.max(perLine,1)));
+    var h = lines * fs * TITLE_LEADING / 72;
+    if(lines<=2 && h<=maxHeightIn) return { size:fs, lines:lines, h:h };
+  }
+  return { size:24, lines:2, h:2*24*TITLE_LEADING/72 };
+}
+// Header block: title placeholder + subtitle. Returns where content may start.
+function header(c, P, objs){
+  var f = fitTitleSize(c.title, G.TITLE.w, 1.02);
+  var boxH = Math.max(G.TITLE.h, f.h * 1.10);
+  objs.push(T('title', G.TITLE.x, G.TITLE.y, G.TITLE.w, boxH,
+    c.title, f.size, {bold:true, color:P.ink, leading:TITLE_LEADING, placeholder:'title'}));
+  var y = G.TITLE.y + boxH + 0.04;
+  if(c.subtitle){
+    objs.push(T('sub', G.TITLE.x, y, colW(11), 0.40, c.subtitle, 13, {color:P.soft, leading:1.25}));
+    y += 0.52;
+  }
+  return Math.max(G.CONTENT_TOP, y);
+}
+function noteBar(objs, P, text, top, id){
+  if(!text) return top;
+  var h = 0.62;
+  var y = G.CONTENT_BOTTOM - h;
+  objs.push(Bx((id||'note')+'Bg', colX(0), y, colW(12), h, {fill:P.surface, line:P.line, lineW:1, radius:0.1}));
+  objs.push(Bx((id||'note')+'Mark', colX(0), y, 0.06, h, {fill:P.accent, decor:true}));
+  objs.push(T((id||'note')+'Txt', colX(0)+0.26, y+0.06, colW(12)-0.5, h-0.12, text, 11.5, {color:P.ink, valign:'mid', leading:1.3}));
+  return y - 0.24;
+}
+function toneFill(tone, P){
+  if(tone==='accent') return { bg:P.surfaceAccent, line:P.accentLine, ink:P.ink, kicker:P.accentDark, icon:P.accent };
+  if(tone==='accent2') return { bg:P.surfaceAccent2, line:P.accent2Line, ink:P.ink, kicker:P.accent2Dark, icon:P.accent2Dark };
+  if(tone==='dark') return { bg:P.ink, line:P.ink, ink:P.onAccent, kicker:P.onAccent, icon:P.onAccent };
+  return { bg:P.surface, line:P.line, ink:P.ink, kicker:P.soft, icon:P.accent };
+}
+var STEP_ICONS = ['users','layers','target','check'];
+
 var TEMPLATES = {
   cover: {
     label:'Cover', layout:'Leer',
-    defaultContent:{
-      eyebrow:'AI & DATA DELIVERY HUB',
-      title:'Von der Chat-Antwort\nzur Boardroom-Folie',
-      subtitle:'Ein Raster ersetzt geratene Koordinaten. Dieselbe Objektliste füllt HTML-Vorschau und PowerPoint.',
-      badge:['12 SPALTEN','0,52" RAND','0,31" GUTTER','MASTER-GEBUNDEN']
-    },
-    build:function(c,P){
-      return { objs:[
-        T('eyebrow', colX(0), G.MARGIN+0.1, colW(7), 0.28, c.eyebrow, 11, {bold:true, color:P.accent}),
-        T('title', colX(0), 1.05, colW(8), 1.6, c.title, 34, {bold:true, color:P.ink, leading:1.15}),
-        Bx('rule', colX(0), 2.90, 0.62, 0.04, {fill:P.accent2}),
-        T('sub', colX(0), 3.15, colW(7), 1.0, c.subtitle, 14, {color:P.ink}),
-        Bx('panel', colX(8), G.CONTENT_TOP, colW(4), G.CONTENT_H, {fill:P.accent, radius:0.16}),
-        Ic('panelIcon', 'layers', colX(8)+0.45, G.CONTENT_TOP+0.55, 0.8, P.onAccent),
-        T('panelTxt', colX(8)+0.45, G.CONTENT_TOP+1.75, colW(4)-0.9, 2.6, (c.badge||[]).join('\n'), 13, {bold:true, color:P.onAccent, leading:2.1})
-      ]};
-    }
-  },
-  agenda: {
-    label:'Agenda', layout:'Nur Titel',
-    defaultContent:{ title:'Agenda', items:[
-      {label:'Ausgangslage und Zielbild'},
-      {label:'Diagnose: Freihand statt Raster'},
-      {label:'Raster-Engine im Test'},
-      {label:'Rollout im Unternehmen'} ]},
-    build:function(c,P){
-      var objs = [ T('title', G.TITLE.x, G.TITLE.y, G.TITLE.w, G.TITLE.h, c.title, 40, {bold:true, color:P.ink, placeholder:'title'}) ];
-      var items = c.items||[], n = items.length||1;
-      var stepH = Math.min(1.3, G.CONTENT_H/Math.max(n,1));
-      items.forEach(function(it,i){
-        var y = G.CONTENT_TOP + i*stepH;
-        objs.push(Bx('num'+i, colX(0), y, 0.62, 0.62, {fill:P.accent, radius:0.31}));
-        objs.push(T('numTxt'+i, colX(0), y, 0.62, 0.62, String(i+1).padStart(2,'0'), 14, {bold:true, color:P.onAccent, align:'center', valign:'mid'}));
-        objs.push(T('lbl'+i, colX(0)+0.86, y, colW(12)-1.04, 0.62, it.label, 17, {color:P.ink, valign:'mid'}));
-      });
-      return { objs:objs };
-    }
-  },
-  kpi: {
-    label:'Kennzahlen', layout:'Nur Titel',
-    defaultContent:{
-      title:'Was die Engine leistet',
-      lead:'Qualität entsteht nicht durch Nachbessern am Bildschirm, sondern durch ein Raster, das Abweichungen gar nicht erst zulässt.',
-      kpis:[
-        {value:'21', label:'Layouts des Unternehmensmasters bleiben verknüpft', icon:'layers'},
-        {value:'12', label:'Spalten, direkt aus der Master-Geometrie abgeleitet', icon:'target'},
-        {value:'0', label:'Nacharbeit an Rändern und Abständen', icon:'check'} ]},
     build:function(c,P){
       var objs = [
-        T('title', G.TITLE.x, G.TITLE.y, G.TITLE.w, G.TITLE.h, c.title, 40, {bold:true, color:P.ink, placeholder:'title'}),
-        T('lead', colX(0), G.CONTENT_TOP, colW(12), 0.75, c.lead, 16, {color:P.ink})
+        T('eyebrow', colX(0), 1.15, colW(7), 0.3, c.eyebrow, 11.5, {bold:true, color:P.accent}),
+        T('title', colX(0), 1.62, colW(7), 1.15, c.title, 54, {bold:true, color:P.ink}),
+        Bx('rule', colX(0), 3.02, 0.7, 0.05, {fill:P.accent2}),
+        T('lead', colX(0), 3.35, colW(6), 0.9, c.lead, 15, {color:P.ink, leading:1.35}),
+        T('meta', colX(0), 4.55, colW(6), 0.3, (c.meta||[]).join('   ·   '), 11.5, {color:P.soft}),
+        Bx('panel', colX(7), 1.62, colW(5), 3.52, {fill:P.accent, radius:0.18}),
+        Bx('mark', colX(7)+0.45, 2.0, 0.8, 0.8, {fill:P.onAccent, radius:0.16}),
+        T('markTxt', colX(7)+0.45, 2.0, 0.8, 0.8, c.panelMark, 22, {bold:true, color:P.accent, align:'center', valign:'mid'}),
+        T('panelStrong', colX(7)+0.45, 3.02, colW(5)-0.9, 0.5, c.panelStrong, 19, {bold:true, color:P.onAccent}),
+        T('panelText', colX(7)+0.45, 3.62, colW(5)-0.9, 0.9, c.panelText, 13, {color:P.onAccent, leading:1.35})
       ];
-      var kpis = c.kpis||[], n = kpis.length||1, span = G.COLS/n;
-      var kpiY = G.CONTENT_TOP + 1.05, kpiH = 3.1;
-      kpis.forEach(function(k,i){
-        var x = colX(i*span), w = colW(span);
-        objs.push(Bx('card'+i, x, kpiY, w, kpiH, {fill:{role:null,hex:'F5F6F7'}, line:P.line, lineW:1, radius:0.12, peerGroup:'kpi'}));
-        if(k.icon){
-          objs.push(Bx('ibadge'+i, x+0.3, kpiY+0.34, 0.62, 0.62, {fill:P.onAccent, line:P.line, lineW:1, radius:0.31}));
-          objs.push(Ic('icon'+i, k.icon, x+0.46, kpiY+0.50, 0.30, P.accent));
-        }
-        objs.push(T('val'+i, x+0.3, kpiY+1.28, w-0.6, 0.7, k.value, 36, {bold:true, color:P.accent}));
-        objs.push(T('lbl'+i, x+0.3, kpiY+2.12, w-0.6, 0.8, k.label, 12, {color:P.ink, leading:1.35}));
-      });
       return { objs:objs };
     }
   },
-  split: {
-    label:'Vergleich', layout:'Nur Titel',
-    defaultContent:{
-      title:'Freihand vs. Raster-Engine',
-      left:{ label:'Freihand — Ist-Zustand', icon:'trending-up', items:['Koordinaten pro Objekt geschätzt','Ränder wandern von Folie zu Folie','Kein Kontrast- oder Abstands-Check','Kein Bezug zum Unternehmensmaster'] },
-      right:{ label:'Raster-Engine — Zielbild', icon:'check', items:['12-Spalten-Raster aus dem Master','Vorlagen bekommen Inhalt, keine Koordinaten','Gate prüft Rand, Überlappung, Kontrast','Export bleibt mit dem Master verknüpft'] } },
+
+  summary: {
+    label:'Summary', layout:'Nur Titel',
     build:function(c,P){
-      var objs = [ T('title', G.TITLE.x, G.TITLE.y, G.TITLE.w, G.TITLE.h, c.title, 40, {bold:true, color:P.ink, placeholder:'title'}) ];
-      [ {sc:0, d:c.left, tint:P.muted}, {sc:6, d:c.right, tint:P.accent2} ].forEach(function(col){
-        var x = colX(col.sc), w = colW(6), d = col.d||{};
-        objs.push(Bx('rule'+col.sc, x, G.CONTENT_TOP, w, 0.04, {fill:col.tint}));
-        objs.push(Ic('hIcon'+col.sc, d.icon, x, G.CONTENT_TOP+0.3, 0.34, col.tint));
-        objs.push(T('head'+col.sc, x+0.5, G.CONTENT_TOP+0.28, w-0.5, 0.4, d.label, 16, {bold:true, color:P.ink}));
-        var rowY = G.CONTENT_TOP+1.05, rowH = 0.95;
-        (d.items||[]).forEach(function(item,i){
-          objs.push(T('b'+col.sc+i, x, rowY+i*rowH, w, rowH-0.1, '– '+item, 13, {color:P.ink, leading:1.3}));
-        });
+      var objs = [], top = header(c,P,objs);
+      objs.push(Bx('badge', colX(0), top, colW(2), 1.5, {fill:P.accent, radius:0.14}));
+      objs.push(T('badgeNum', colX(0), top+0.12, colW(2), 0.95, c.badgeNum, 46, {bold:true, color:P.onAccent, align:'center'}));
+      objs.push(T('badgeLbl', colX(0), top+1.62, colW(2), 0.9, c.badgeLabel, 11.5, {color:P.soft, leading:1.3}));
+      var items = c.items||[], n = items.length||1;
+      var listX = colX(2.4), listW = colW(9.6);
+      var rowH = (G.CONTENT_BOTTOM - top) / n;
+      items.forEach(function(it,i){
+        var y = top + i*rowH;
+        if(i>0) objs.push(Bx('sep'+i, listX, y-0.02, listW, 0.012, {fill:P.line, decor:true}));
+        objs.push(T('n'+i, listX, y+0.14, 0.42, 0.3, it.n, 12, {bold:true, color:it.emphasis?P.accent:P.soft}));
+        objs.push(T('s'+i, listX+0.58, y+0.10, listW-0.58, 0.32, it.strong, 14, {bold:true, color:P.ink}));
+        objs.push(T('p'+i, listX+0.58, y+0.46, listW-0.58, rowH-0.56, it.text, 11.5, {color:P.soft, leading:1.3}));
       });
       return { objs:objs };
     }
   },
-  timeline: {
+
+  statement: {
+    label:'Statement', layout:'Nur Titel',
+    build:function(c,P){
+      var objs = [], top = header(c,P,objs);
+      var lw = colW(6);
+      objs.push(T('eyebrow', colX(0), top, lw, 0.28, String(c.eyebrow||'').toUpperCase(), 10.5, {bold:true, color:P.accent}));
+      objs.push(T('head', colX(0), top+0.42, lw, 0.78, c.headline, 30, {bold:true, color:P.ink, leading:1.12}));
+      objs.push(T('headAcc', colX(0), top+1.24, lw, 1.15, c.headlineAccent, 30, {bold:true, color:P.accent, leading:1.12}));
+      objs.push(T('text', colX(0), top+2.62, lw, 1.1, c.text, 13.5, {color:P.ink, leading:1.4}));
+      var proofs = c.proofs||[], n = proofs.length||1;
+      var ph = (G.CONTENT_BOTTOM - top - (n-1)*0.18) / n;
+      proofs.forEach(function(p,i){
+        var tone = toneFill(p.muted ? 'default' : 'accent', P);
+        var y = top + i*(ph+0.18), x = colX(6.4), w = colW(5.6);
+        objs.push(Bx('pc'+i, x, y, w, ph, {fill:tone.bg, line:tone.line, lineW:1, radius:0.1, peerGroup:'proof'}));
+        objs.push(Bx('pm'+i, x, y, 0.07, ph, {fill:p.muted?P.line:P.accent, decor:true}));
+        objs.push(Ic('pi'+i, STEP_ICONS[i%STEP_ICONS.length], x+0.28, y+0.2, 0.3, tone.icon));
+        objs.push(T('pb'+i, x+0.72, y+0.18, w-0.95, 0.32, p.b, 13, {bold:true, color:P.ink}));
+        objs.push(T('pt'+i, x+0.72, y+0.56, w-0.95, ph-0.7, p.text, 11.5, {color:P.soft, leading:1.3}));
+      });
+      return { objs:objs };
+    }
+  },
+
+  flow4: {
     label:'Prozess', layout:'Nur Titel',
-    defaultContent:{ title:'Rollout-Prozess', steps:[
-      {label:'Master verankern', icon:'layers'},
-      {label:'Content statt Koordinaten', icon:'users'},
-      {label:'Vorschau redigieren', icon:'trending-up'},
-      {label:'Export bleibt verknüpft', icon:'check'} ]},
     build:function(c,P){
-      var objs = [ T('title', G.TITLE.x, G.TITLE.y, G.TITLE.w, G.TITLE.h, c.title, 40, {bold:true, color:P.ink, placeholder:'title'}) ];
-      var steps = c.steps||[], n = steps.length||1;
-      var segW = colW(12)/n, nodeSize = 1.1;
-      var blockH = nodeSize + 0.24 + 0.8;
-      var nodeY = G.CONTENT_TOP + (G.CONTENT_H - blockH)/2;
-      objs.push(Bx('track', colX(0)+nodeSize/2, nodeY+nodeSize/2-0.02, colW(12)-nodeSize, 0.04, {fill:P.line, decor:true}));
-      steps.forEach(function(s,i){
-        var cx = colX(0) + segW*(i+0.5);
-        objs.push(Bx('node'+i, cx-nodeSize/2, nodeY, nodeSize, nodeSize, {fill:P.accent2, radius:nodeSize/2, peerGroup:'steps'}));
-        objs.push(Ic('nicon'+i, s.icon, cx-nodeSize*0.25, nodeY+nodeSize*0.25, nodeSize*0.5, P.onAccent));
-        objs.push(T('nlbl'+i, cx-segW/2+0.12, nodeY+nodeSize+0.24, segW-0.24, 0.8, s.label, 14, {color:P.ink, align:'center', leading:1.3}));
+      var objs = [], top = header(c,P,objs);
+      var bottom = noteBar(objs, P, c.note, top, 'note');
+      var steps = c.steps||[], n = steps.length||1, span = G.COLS/n;
+      var h = bottom - top;
+      steps.forEach(function(st,i){
+        var x = colX(i*span), w = colW(span), tone = toneFill(st.tone, P);
+        objs.push(Bx('sc'+i, x, top, w, h, {fill:tone.bg, line:tone.line, lineW:1, radius:0.12, peerGroup:'step'}));
+        objs.push(Bx('sn'+i, x+0.24, top+0.22, 0.42, 0.42, {fill:st.tone==='dark'?P.onAccent:P.ink, radius:0.21}));
+        objs.push(T('snt'+i, x+0.24, top+0.22, 0.42, 0.42, st.n, 12, {bold:true, color:st.tone==='dark'?P.ink:P.onAccent, align:'center', valign:'mid'}));
+        objs.push(Ic('si'+i, STEP_ICONS[i%STEP_ICONS.length], x+w-0.62, top+0.26, 0.34, tone.icon));
+        objs.push(T('sk'+i, x+0.24, top+0.86, w-0.48, 0.26, String(st.kicker||'').toUpperCase(), 9.5, {bold:true, color:tone.kicker}));
+        objs.push(T('sh'+i, x+0.24, top+1.18, w-0.48, 0.6, st.h3, 15, {bold:true, color:tone.ink, leading:1.15}));
+        objs.push(T('sp'+i, x+0.24, top+1.86, w-0.48, h-2.1, st.text, 11, {color:st.tone==='dark'?P.onAccent:P.soft, leading:1.3}));
+        if(i < n-1) objs.push(T('ar'+i, x+w, top+h/2-0.16, G.GUTTER, 0.32, '›', 17, {color:P.soft, align:'center', valign:'mid'}));
       });
       return { objs:objs };
     }
   },
-  closing: {
-    label:'Abschluss', layout:'Leer',
-    defaultContent:{ title:'Bereit zum Testen', subtitle:'Gleiches Raster, gleicher Master, gleicher Export.', cta:'Content-JSON anpassen und exportieren' },
+
+  grid3: {
+    label:'Drei Karten', layout:'Nur Titel',
     build:function(c,P){
-      return { objs:[
-        T('title', colX(0), G.CONTENT_TOP+0.3, colW(8), 0.85, c.title, 34, {bold:true, color:P.ink}),
-        T('sub', colX(0), G.CONTENT_TOP+1.35, colW(7), 0.6, c.subtitle, 16, {color:P.ink}),
-        Bx('cta', colX(0), G.CONTENT_TOP+2.3, 5.1, 0.62, {fill:P.accent, radius:0.31}),
-        T('ctaTxt', colX(0)+0.3, G.CONTENT_TOP+2.3, 5.1-0.6, 0.62, c.cta, 13, {bold:true, color:P.onAccent, valign:'mid'}),
-        Bx('badge', colX(9), G.CONTENT_TOP+0.9, 2.0, 2.0, {fill:P.accent2, radius:1.0}),
-        Ic('badgeIcon', 'check', colX(9)+0.65, G.CONTENT_TOP+0.9+0.65, 0.7, P.onAccent)
-      ]};
+      var objs = [], top = header(c,P,objs);
+      var bottom = G.CONTENT_BOTTOM;
+      if(c.callout){
+        var cy = G.CONTENT_BOTTOM - 0.66;
+        objs.push(Bx('coBg', colX(0), cy, colW(12), 0.66, {fill:P.surfaceAccent2, line:P.accent2Line, lineW:1, radius:0.33}));
+        objs.push(Bx('coB', colX(0)+0.14, cy+0.12, 0.42, 0.42, {fill:P.accent2Dark, radius:0.21}));
+        objs.push(T('coBt', colX(0)+0.14, cy+0.12, 0.42, 0.42, c.calloutBubble||'AI', 10.5, {bold:true, color:P.onAccent, align:'center', valign:'mid'}));
+        objs.push(T('coTxt', colX(0)+0.74, cy, colW(12)-0.95, 0.66, c.callout, 13, {bold:true, color:P.ink, valign:'mid'}));
+        bottom = cy - 0.26;
+      }
+      var cards = c.cards||[], n = cards.length||1, span = G.COLS/n, h = bottom - top;
+      cards.forEach(function(cd,i){
+        var x = colX(i*span), w = colW(span), tone = toneFill(cd.tone, P);
+        objs.push(Bx('c'+i, x, top, w, h, {fill:tone.bg, line:tone.line, lineW:1, radius:0.12, peerGroup:'card'}));
+        objs.push(Ic('ci'+i, STEP_ICONS[i%STEP_ICONS.length], x+0.3, top+0.3, 0.36, tone.icon));
+        objs.push(T('ck'+i, x+0.3, top+0.86, w-0.6, 0.26, String(cd.kicker||'').toUpperCase(), 9.5, {bold:true, color:tone.kicker}));
+        objs.push(T('ch'+i, x+0.3, top+1.2, w-0.6, 0.72, cd.h3, 17, {bold:true, color:tone.ink, leading:1.15}));
+        objs.push(T('cp'+i, x+0.3, top+2.04, w-0.6, h-2.3, cd.text, 12, {color:cd.tone==='dark'?P.onAccent:P.soft, leading:1.35}));
+      });
+      return { objs:objs };
+    }
+  },
+
+  visionFactors: {
+    label:'Prinzip', layout:'Nur Titel',
+    build:function(c,P){
+      var objs = [], top = header(c,P,objs);
+      var bottom = noteBar(objs, P, c.note, top, 'note');
+      var h = bottom - top;
+      var tx = colX(0), tw = colW(5);
+      objs.push(Bx('tile', tx, top, tw, h, {fill:P.surfaceAccent2, line:P.accent2Line, lineW:1, radius:0.14}));
+      objs.push(Bx('pill', tx+0.3, top+0.3, 2.5, 0.34, {fill:P.accent2Dark, radius:0.17}));
+      objs.push(T('pillT', tx+0.3, top+0.3, 2.5, 0.34, c.tilePill, 9.5, {bold:true, color:P.onAccent, align:'center', valign:'mid'}));
+      objs.push(T('pre', tx+0.3, top+0.86, tw-0.6, 0.26, c.tilePre, 10, {bold:true, color:P.soft}));
+      objs.push(T('tileH', tx+0.3, top+1.2, tw-0.6, 0.9, c.tileH3, 22, {bold:true, color:P.ink, leading:1.15}));
+      objs.push(T('tileP', tx+0.3, top+2.24, tw-0.6, h-2.5, c.tileText, 12.5, {color:P.soft, leading:1.35}));
+      var fx = colX(5.4), fw = colW(6.6);
+      var factors = c.factors||[], n = factors.length||1;
+      var fh = (h - (n-1)*0.16) / n;
+      factors.forEach(function(f,i){
+        var y = top + i*(fh+0.16), tone = toneFill(f.tone==='accent2'?'accent2':'default', P);
+        objs.push(Bx('f'+i, fx, y, fw, fh, {fill:tone.bg, line:tone.line, lineW:1, radius:0.1, peerGroup:'factor'}));
+        objs.push(Ic('fi'+i, STEP_ICONS[i%STEP_ICONS.length], fx+0.28, y+0.26, 0.34, tone.icon));
+        objs.push(T('fh'+i, fx+0.78, y+0.22, fw-1.05, 0.34, f.h4, 14, {bold:true, color:P.ink}));
+        objs.push(T('fp'+i, fx+0.78, y+0.62, fw-1.05, fh-0.8, f.text, 11.5, {color:P.soft, leading:1.3}));
+      });
+      return { objs:objs };
+    }
+  },
+
+  techGrid: {
+    label:'Baukasten', layout:'Nur Titel',
+    build:function(c,P){
+      var objs = [], top = header(c,P,objs);
+      var h = G.CONTENT_BOTTOM - top;
+      var kpis = c.kpis||[], cellW = colW(3.4), gapX = 0.24, cellH = (h-0.22)/2;
+      kpis.slice(0,4).forEach(function(k,i){
+        var col = i%2, row = Math.floor(i/2);
+        var x = colX(col*3.6), y = top + row*(cellH+0.22), tone = toneFill(k.tone, P);
+        objs.push(Bx('k'+i, x, y, cellW, cellH, {fill:tone.bg, line:tone.line, lineW:1, radius:0.1, peerGroup:'kpi'+row}));
+        objs.push(T('kn'+i, x+0.26, y+0.18, cellW-0.5, 0.62, k.num, 32, {bold:true, color:k.tone==='accent2'?P.accent2Dark:P.accent}));
+        objs.push(T('kh'+i, x+0.26, y+0.86, cellW-0.5, 0.3, k.h3, 13, {bold:true, color:P.ink}));
+        objs.push(T('kp'+i, x+0.26, y+1.2, cellW-0.5, cellH-1.36, k.text, 10.5, {color:P.soft, leading:1.3}));
+      });
+      var rx = colX(7.6), rw = colW(4.4);
+      objs.push(Bx('rBg', rx, top, rw, h, {fill:P.surface, line:P.line, lineW:1, radius:0.12}));
+      objs.push(Bx('rPill', rx+0.28, top+0.28, 2.6, 0.34, {fill:P.accent2Dark, radius:0.17}));
+      objs.push(T('rPillT', rx+0.28, top+0.28, 2.6, 0.34, c.rightPill, 9.5, {bold:true, color:P.onAccent, align:'center', valign:'mid'}));
+      objs.push(T('rH', rx+0.28, top+0.8, rw-0.56, 0.62, c.rightH3, 17, {bold:true, color:P.ink, leading:1.15}));
+      var lines = c.lines||[], n = lines.length||1;
+      var ly = top+1.62, lh = (h-1.8)/n;
+      lines.forEach(function(l,i){
+        var y = ly + i*lh;
+        objs.push(Ic('li'+i, STEP_ICONS[i%STEP_ICONS.length], rx+0.28, y+0.04, 0.3, P.accent));
+        objs.push(T('lb'+i, rx+0.72, y, rw-1.0, 0.3, l.b, 12.5, {bold:true, color:P.ink}));
+        objs.push(T('lt'+i, rx+0.72, y+0.34, rw-1.0, lh-0.46, l.text, 10.5, {color:P.soft, leading:1.3}));
+      });
+      return { objs:objs };
+    }
+  },
+
+  layers: {
+    label:'Architektur', layout:'Nur Titel',
+    build:function(c,P){
+      var objs = [], top = header(c,P,objs);
+      var bottom = noteBar(objs, P, c.note, top, 'note');
+      var uses = c.uses||[], n = uses.length||1, span = G.COLS/n, useH = 1.05;
+      uses.forEach(function(u,i){
+        var x = colX(i*span), w = colW(span);
+        objs.push(Bx('u'+i, x, top, w, useH, {fill:P.surface, line:P.line, lineW:1, radius:0.1, peerGroup:'use'}));
+        objs.push(T('ut'+i, x+0.15, top, w-0.3, useH, u, 13, {bold:true, color:P.ink, align:'center', valign:'mid'}));
+      });
+      var y2 = top + useH + 0.3;
+      var barH = Math.min(1.15, (bottom - y2 - 0.3)/2);
+      objs.push(Bx('struct', colX(0), y2, colW(12), barH, {fill:P.accent, radius:0.12}));
+      objs.push(T('structT', colX(0)+0.35, y2, colW(12)-0.7, barH, c.structure, 14, {bold:true, color:P.onAccent, align:'center', valign:'mid', leading:1.25}));
+      var y3 = y2 + barH + 0.3;
+      objs.push(Bx('base', colX(0), y3, colW(12), barH, {fill:P.surfaceAccent2, line:P.accent2, lineW:1, radius:0.12}));
+      objs.push(T('baseT', colX(0)+0.35, y3, colW(12)-0.7, barH, c.base, 13, {bold:true, color:P.accent2Dark, align:'center', valign:'mid', leading:1.25}));
+      return { objs:objs };
+    }
+  },
+
+  kpiMosaic: {
+    label:'KPI-Mosaik', layout:'Nur Titel',
+    build:function(c,P){
+      var objs = [], top = header(c,P,objs);
+      var h = G.CONTENT_BOTTOM - top;
+      var bigH = h*0.58, lx = colX(0), lw = colW(5);
+      var b = c.big||{};
+      objs.push(Bx('big', lx, top, lw, bigH, {fill:P.accent, radius:0.14}));
+      objs.push(T('bigL', lx+0.32, top+0.26, lw-0.64, 0.26, b.label, 10, {bold:true, color:P.onAccent}));
+      objs.push(T('bigV', lx+0.32, top+0.62, lw-0.64, 1.15, b.value, 60, {bold:true, color:P.onAccent}));
+      objs.push(T('bigP', lx+0.32, top+bigH-0.92, lw-0.64, 0.8, b.text, 12, {color:P.onAccent, leading:1.3}));
+      var cards = c.cards||[], cy = top + bigH + 0.22, ch = h - bigH - 0.22;
+      cards.slice(0,1).forEach(function(cd,i){
+        var tone = toneFill(cd.tone==='accent2'?'accent2':'default', P);
+        objs.push(Bx('sc'+i, lx, cy, lw, ch, {fill:tone.bg, line:tone.line, lineW:1, radius:0.12}));
+        objs.push(T('scL'+i, lx+0.32, cy+0.2, lw-0.64, 0.24, cd.label, 10, {bold:true, color:P.soft}));
+        objs.push(T('scV'+i, lx+0.32, cy+0.5, lw-0.64, 0.6, cd.value, 30, {bold:true, color:P.accent2Dark}));
+        objs.push(T('scP'+i, lx+0.32, cy+1.14, lw-0.64, ch-1.3, cd.text, 11, {color:P.soft, leading:1.3}));
+      });
+      var rx = colX(5.4), rw = colW(6.6), halfW = (rw-0.22)/2, halfH = (h-0.22)/2;
+      var rest = cards.slice(1).concat(c.tiles||[]);
+      rest.slice(0,4).forEach(function(item,i){
+        var col = i%2, row = Math.floor(i/2);
+        var x = rx + col*(halfW+0.22), y = top + row*(halfH+0.22);
+        var isTile = item.value === undefined;
+        var tone = toneFill(isTile ? 'accent2' : 'default', P);
+        objs.push(Bx('r'+i, x, y, halfW, halfH, {fill:tone.bg, line:tone.line, lineW:1, radius:0.12, peerGroup:'mos'+row}));
+        if(isTile){
+          objs.push(Ic('ri'+i, STEP_ICONS[i%STEP_ICONS.length], x+0.28, y+0.26, 0.34, tone.icon));
+          objs.push(T('rb'+i, x+0.28, y+0.74, halfW-0.56, 0.3, item.b, 13, {bold:true, color:P.ink}));
+          objs.push(T('rp'+i, x+0.28, y+1.1, halfW-0.56, halfH-1.26, item.text, 11, {color:P.soft, leading:1.3}));
+        } else {
+          objs.push(T('rl'+i, x+0.28, y+0.22, halfW-0.56, 0.24, item.label, 10, {bold:true, color:P.soft}));
+          objs.push(T('rv'+i, x+0.28, y+0.52, halfW-0.56, 0.6, item.value, 30, {bold:true, color:P.accent}));
+          objs.push(T('rt'+i, x+0.28, y+1.16, halfW-0.56, halfH-1.32, item.text, 11, {color:P.soft, leading:1.3}));
+        }
+      });
+      return { objs:objs };
     }
   }
 };
-var TPL_ORDER = ['cover','agenda','kpi','split','timeline','closing'];
+var TPL_ORDER = ['cover','summary','statement','flow4','grid3','visionFactors','techGrid','layers','kpiMosaic'];
 
 function buildScene(tplKey, content, theme){
   var P = paletteFor(theme || DEFAULT_THEME);
@@ -270,12 +436,18 @@ function computeGate(scene){
   var groups = {}, alignWarn = null;
   boxes.forEach(function(o){ if(o.peerGroup){ (groups[o.peerGroup]=groups[o.peerGroup]||[]).push(o); } });
   Object.keys(groups).forEach(function(g){
-    var arr=groups[g], ys=arr.map(function(o){return o.y;}), hs=arr.map(function(o){return o.h;});
-    var dy=Math.max.apply(null,ys)-Math.min.apply(null,ys), dh=Math.max.apply(null,hs)-Math.min.apply(null,hs);
-    if(dy>0.01||dh>0.01) alignWarn={dy:dy,dh:dh};
+    var arr=groups[g];
+    if(arr.length<2) return;
+    function spread(f){ var v=arr.map(f); return Math.max.apply(null,v)-Math.min.apply(null,v); }
+    // A row of peers must share top and height; a stacked column must share
+    // left and width. Pick the axis the group is actually laid out along.
+    var isRow = spread(function(o){return o.x;}) > spread(function(o){return o.y;});
+    var d1 = isRow ? spread(function(o){return o.y;}) : spread(function(o){return o.x;});
+    var d2 = isRow ? spread(function(o){return o.h;}) : spread(function(o){return o.w;});
+    if(d1>0.01||d2>0.01) alignWarn={dy:d1,dh:d2,axis:isRow?'Reihe':'Spalte'};
   });
   rows.push(alignWarn
-    ? {status:'warn', title:'Peers nicht bündig', detail:'Oberkanten Δ '+alignWarn.dy.toFixed(2)+'", Höhen Δ '+alignWarn.dh.toFixed(2)+'".'}
+    ? {status:'warn', title:'Peers nicht bündig', detail:alignWarn.axis+': Kanten Δ '+alignWarn.dy.toFixed(2)+'", Maße Δ '+alignWarn.dh.toFixed(2)+'".'}
     : {status:'pass', title:'Peers schließen bündig ab', detail:'Gleiche Oberkante und Höhe je Gruppe.'});
 
   var worstRatio = 99;
@@ -343,9 +515,12 @@ function textXml(o,id){
   if(o.placeholder === 'title'){
     return '<p:sp><p:nvSpPr><p:cNvPr id="'+id+'" name="Titel '+id+'"/>'
       + '<p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr>'
-      + '<p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/>'
+      + '<p:spPr>'+xfrm(o)+'</p:spPr>'
+      + '<p:txBody><a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" anchor="t"><a:noAutofit/></a:bodyPr><a:lstStyle/>'
       + String(o.value).split('\n').map(function(line){
-          return '<a:p><a:r><a:rPr lang="de-DE" dirty="0"/><a:t xml:space="preserve">'+xesc(line)+'</a:t></a:r></a:p>';
+          return '<a:p><a:pPr algn="l"><a:lnSpc><a:spcPct val="'+Math.round((o.leading||1.2)*100000)+'"/></a:lnSpc></a:pPr>'
+            + '<a:r><a:rPr lang="de-DE" sz="'+Math.round(o.fontSize*100)+'" b="1" dirty="0"/>'
+            + '<a:t xml:space="preserve">'+xesc(line)+'</a:t></a:r></a:p>';
         }).join('')
       + '</p:txBody></p:sp>';
   }

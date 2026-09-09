@@ -1,0 +1,327 @@
+[
+  {
+    "template": "cover",
+    "content": {
+      "eyebrow": "AI-FIRST PRODUCTIVITY",
+      "title": "StoryCraft",
+      "lead": "Von der Idee zur managementfähigen Präsentation – direkt aus dem AI-Dialog.",
+      "meta": [
+        "Management Pitch",
+        "AI & Data Delivery Hub"
+      ],
+      "panelMark": "SC",
+      "panelStrong": "AI + Design + Struktur",
+      "panelText": "Ein skalierbarer Ansatz für AI-generierte Arbeitsprodukte"
+    }
+  },
+  {
+    "template": "summary",
+    "content": {
+      "title": "Management Summary",
+      "subtitle": "Fünf Botschaften, die StoryCraft für das Management relevant machen.",
+      "badgeNum": "5",
+      "badgeLabel": "Kernbotschaften in 3 Minuten",
+      "items": [
+        {
+          "n": "01",
+          "strong": "Der Medienbruch wird geschlossen",
+          "text": "AI unterstützt nicht nur Story und Inhalt, sondern erzeugt direkt die präsentierbare Unterlage.",
+          "emphasis": true
+        },
+        {
+          "n": "02",
+          "strong": "Design ist systematisch eingebaut",
+          "text": "Master, Typografie, Piktogramme, Farben und Visual Patterns sorgen für konsistente Management-Qualität.",
+          "emphasis": false
+        },
+        {
+          "n": "03",
+          "strong": "Die Folien bleiben strukturiert",
+          "text": "Texte, Shapes, Icons, Charts und Tabellen werden als Objekte erzeugt – nicht als flaches Bild.",
+          "emphasis": false
+        },
+        {
+          "n": "04",
+          "strong": "Der Ansatz ist skalierbar",
+          "text": "Jeder mit ChatGPT kann StoryCraft nutzen und individualisieren; eine Microsoft-Copilot-Variante ist in Arbeit.",
+          "emphasis": false
+        },
+        {
+          "n": "05",
+          "strong": "Der Use Case ist größer als PowerPoint",
+          "text": "StoryCraft zeigt, wie AI klassische Wissensarbeit vom Assistenten zum direkt erzeugten Arbeitsprodukt weiterentwickeln kann.",
+          "emphasis": false
+        }
+      ]
+    }
+  },
+  {
+    "template": "statement",
+    "content": {
+      "title": "Der Medienbruch liegt nicht in der Idee – sondern auf dem Weg zur fertigen Präsentation",
+      "subtitle": "AI beschleunigt Story und Inhalte bereits heute. Der letzte Schritt zum präsentierbaren Arbeitsprodukt bleibt häufig manuell.",
+      "eyebrow": "Ausgangslage",
+      "headline": "AI denkt mit.",
+      "headlineAccent": "PowerPoint wird trotzdem noch gebaut.",
+      "text": "Wir verlieren Zeit beim Übertragen, Visualisieren, Ausrichten und Nacharbeiten – obwohl die inhaltliche Arbeit bereits mit AI entstanden ist.",
+      "proofs": [
+        {
+          "b": "Story & Inhalt",
+          "text": "entstehen schnell im Dialog mit AI.",
+          "muted": false
+        },
+        {
+          "b": "Layout & Visualisierung",
+          "text": "werden anschließend manuell in PowerPoint übersetzt.",
+          "muted": false
+        },
+        {
+          "b": "Der eigentliche Reibungsverlust",
+          "text": "liegt zwischen AI-generiertem Inhalt und fertigem Arbeitsprodukt.",
+          "muted": true
+        }
+      ]
+    }
+  },
+  {
+    "template": "flow4",
+    "content": {
+      "title": "AI erzeugt nicht nur Inhalte – sondern direkt die Präsentation",
+      "subtitle": "StoryCraft verbindet AI-Logik, Design-System und ein strukturiertes Slide-Modell zu einem durchgängigen Erstellungsprozess.",
+      "steps": [
+        {
+          "n": "1",
+          "kicker": "Input",
+          "h3": "Prompt & Story",
+          "text": "Inhalt, Zielgruppe und Botschaft entstehen im AI-Dialog.",
+          "tone": "default"
+        },
+        {
+          "n": "2",
+          "kicker": "Intelligenz",
+          "h3": "Story & Layout",
+          "text": "AI erkennt Slide-Typ, Informationshierarchie und passende visuelle Logik.",
+          "tone": "accent"
+        },
+        {
+          "n": "3",
+          "kicker": "Struktur",
+          "h3": "Slide-Modell",
+          "text": "Texte, Shapes, Icons und Positionen bleiben als strukturierte Objekte erhalten.",
+          "tone": "accent2"
+        },
+        {
+          "n": "4",
+          "kicker": "Output",
+          "h3": "HTML · PDF · PPTX",
+          "text": "Die gleiche Präsentationslogik wird je nach Bedarf unterschiedlich gerendert.",
+          "tone": "accent2"
+        }
+      ],
+      "note": "Die „Sexiness“ kommt aus dem Design-System: Branding, Typografie, Abstände, Visual Patterns und Gestaltungsregeln sind fest verankert – die AI entscheidet innerhalb dieser Leitplanken."
+    }
+  },
+  {
+    "template": "grid3",
+    "content": {
+      "title": "Weniger PowerPoint-Handwerk – mehr Fokus auf Inhalt und Entscheidung",
+      "subtitle": "Der Mehrwert entsteht durch einen durchgängigen Prozess statt durch einen weiteren Präsentationseditor.",
+      "cards": [
+        {
+          "kicker": "01 · Geschwindigkeit",
+          "h3": "Schneller von der Idee zum Deck",
+          "text": "Storyline, Visualisierung und Präsentation entstehen in einem Workflow. Der manuelle Übertrag in PowerPoint entfällt weitgehend.",
+          "tone": "accent"
+        },
+        {
+          "kicker": "02 · Qualität",
+          "h3": "Konsistenz ist eingebaut",
+          "text": "Master, Branding, Icons, Typografie und Layoutregeln sorgen für wiedererkennbare Management-Qualität – unabhängig vom Ersteller.",
+          "tone": "accent2"
+        },
+        {
+          "kicker": "03 · Iteration",
+          "h3": "Ändern statt neu bauen",
+          "text": "Inhalte und Objekte bleiben strukturiert. Änderungen können direkt umgesetzt werden, ohne die komplette Folie neu zu rendern.",
+          "tone": "dark"
+        }
+      ],
+      "callout": "Vom AI-Assistenten zum AI-erzeugten Arbeitsprodukt.",
+      "calloutBubble": "AI"
+    }
+  },
+  {
+    "template": "visionFactors",
+    "content": {
+      "title": "Kein Spezialtool für Einzelne – sondern ein skalierbares Prinzip",
+      "subtitle": "StoryCraft kann direkt genutzt, individuell angepasst und perspektivisch in die Microsoft-Arbeitswelt übertragen werden.",
+      "tilePill": "SKALIERBARER ANSATZ",
+      "tilePre": "EIN PRINZIP",
+      "tileH3": "AI + DESIGN + STRUKTUR",
+      "tileText": "Nicht eine zentrale Spezialanwendung ist der Skalierungshebel, sondern ein wiederverwendbarer Ansatz für AI-generierte Arbeitsprodukte.",
+      "factors": [
+        {
+          "h4": "Sofort nutzbar",
+          "text": "Jeder mit ChatGPT kann StoryCraft verwenden – ohne lokale Installation oder Spezialsoftware.",
+          "tone": "default"
+        },
+        {
+          "h4": "Individuell anpassbar",
+          "text": "Teams können Branding, Master, Visual Library, Templates und Leitplanken auf ihren Kontext zuschneiden.",
+          "tone": "default"
+        },
+        {
+          "h4": "In die Unternehmenswelt skalierbar",
+          "text": "Parallel entsteht eine Microsoft-Copilot-Variante, um das gleiche Prinzip in der bestehenden MS-Arbeitsumgebung nutzbar zu machen.",
+          "tone": "accent2"
+        }
+      ],
+      "note": "Heute Präsentationen. Morgen weitere Artefakte. Der Ansatz zeigt, wie AI künftig nicht nur unterstützt, sondern standardisierte Wissens- und Managementprodukte direkt erzeugen kann."
+    }
+  },
+  {
+    "template": "techGrid",
+    "content": {
+      "title": "Was steckt technisch drin? Mehr als nur HTML",
+      "subtitle": "StoryCraft kombiniert einen nativen PowerPoint-Baukasten mit wiederverwendbaren Management-Patterns und mehreren Ausgabewegen.",
+      "kpis": [
+        {
+          "num": "18",
+          "h3": "native Kernformen",
+          "text": "Rechteck, Kreis, Chevron, Pfeil, Connector, Callout, Textbox und weitere PowerPoint-kompatible Grundformen.",
+          "tone": "default"
+        },
+        {
+          "num": "43",
+          "h3": "Visual Patterns",
+          "text": "Von Statement und Big Number bis Roadmap, Stage Gate, Architektur, Org-Chart und Transformation.",
+          "tone": "accent2"
+        },
+        {
+          "num": "8",
+          "h3": "Charttypen",
+          "text": "Säule, Balken, Linie, Fläche, Kreis, Donut, Scatter und Kombi – für PowerPoint-kompatible Visualisierung.",
+          "tone": "accent2"
+        },
+        {
+          "num": "6",
+          "h3": "Tabellenmuster",
+          "text": "Standard, Vergleich, RACI, Scorecard, Entscheidungsmatrix und Roadmap-Tabelle.",
+          "tone": "default"
+        }
+      ],
+      "rightPill": "TECHNISCHES PRINZIP",
+      "rightH3": "Ein Baukasten – viele Präsentationen",
+      "lines": [
+        {
+          "b": "Objektbasiert statt Bild",
+          "text": "Texte, Shapes, Icons, Tabellen und Charts bleiben als strukturierte Elemente erhalten."
+        },
+        {
+          "b": "Mehrere Renderer",
+          "text": "Dasselbe strukturierte Slide-Modell kann im Browser präsentiert, als PDF ausgegeben oder in PPTX übersetzt werden."
+        },
+        {
+          "b": "Kombinatorisch skalierbar",
+          "text": "Die Zahl möglicher Folien ist nicht auf 43 begrenzt: Patterns, Formen, Icons, Farben und Inhalte lassen sich frei kombinieren."
+        }
+      ]
+    }
+  },
+  {
+    "template": "flow4",
+    "content": {
+      "title": "Visual Showcase: Prozess & Transformation",
+      "subtitle": "Ein Beispiel, wie aus wenigen nativen Elementen ein klarer Management-Prozess mit visueller Führung entsteht.",
+      "steps": [
+        {
+          "n": "1",
+          "kicker": "Input",
+          "h3": "Verstehen",
+          "text": "Zielgruppe, Problem und Kernbotschaft präzisieren.",
+          "tone": "default"
+        },
+        {
+          "n": "2",
+          "kicker": "Story",
+          "h3": "Strukturieren",
+          "text": "Slide-Typ, Informationshierarchie und Visual Pattern wählen.",
+          "tone": "accent"
+        },
+        {
+          "n": "3",
+          "kicker": "Design",
+          "h3": "Visualisieren",
+          "text": "Shapes, Icons, Typografie und Farben konsistent kombinieren.",
+          "tone": "accent2"
+        },
+        {
+          "n": "4",
+          "kicker": "Output",
+          "h3": "Ausgeben",
+          "text": "Browser, PDF oder PowerPoint aus derselben Logik erzeugen.",
+          "tone": "accent2"
+        }
+      ],
+      "note": "Visuelle Grammatik statt Zufall: dieselben Bausteine lassen sich für Prozesse, Journeys, Stage-Gates oder Roadmaps neu zusammensetzen."
+    }
+  },
+  {
+    "template": "layers",
+    "content": {
+      "title": "Visual Showcase: Architektur & Layer",
+      "subtitle": "Auch technische Zusammenhänge lassen sich managementtauglich verdichten – ohne klassische Architekturdiagramme zu überfrachten.",
+      "uses": [
+        "Management Deck",
+        "Workshop",
+        "Status Update",
+        "One-Pager"
+      ],
+      "structure": "AI Story & Layout Engine · erkennt Botschaft, Slide-Typ und visuelle Hierarchie",
+      "base": "Design System · Telekom Master · Shapes · Icons · Patterns · Charts · Tabellen · Exportlogik",
+      "note": "Trennung von Inhalt, Design und Rendering: genau diese Schichtung macht StoryCraft individualisierbar und auf weitere Artefakte übertragbar."
+    }
+  },
+  {
+    "template": "kpiMosaic",
+    "content": {
+      "title": "Visual Showcase: KPI, Portfolio & Management-Story",
+      "subtitle": "Nicht nur Flows: StoryCraft kann Zahlen, Prioritäten und qualitative Aussagen in einer gemeinsamen visuellen Sprache verbinden.",
+      "big": {
+        "label": "VISUAL LIBRARY",
+        "value": "43",
+        "text": "wiederverwendbare Management- und Visual-Patterns als Ausgangspunkt."
+      },
+      "cards": [
+        {
+          "label": "NATIVE OBJEKTE",
+          "value": "18",
+          "text": "Kernformen für editierbare, PPTX-nahe Visualisierung.",
+          "tone": "accent2"
+        },
+        {
+          "label": "CHARTS",
+          "value": "8",
+          "text": "Charttypen für quantitative Aussagen.",
+          "tone": "default"
+        },
+        {
+          "label": "TABELLEN",
+          "value": "6",
+          "text": "Muster für Vergleich, RACI, Scorecard und Entscheidungen.",
+          "tone": "default"
+        }
+      ],
+      "tiles": [
+        {
+          "b": "Kombinierbar",
+          "text": "Patterns und Objekte lassen sich zu neuen Layouts zusammensetzen."
+        },
+        {
+          "b": "Erweiterbar",
+          "text": "Neue Visual Patterns können in denselben Baukasten aufgenommen werden."
+        }
+      ]
+    }
+  }
+]
