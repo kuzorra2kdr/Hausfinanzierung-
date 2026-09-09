@@ -1,173 +1,151 @@
-<title>StoryCraft Blueprint</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<title>StoryCraft Deck</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{
-  --paper:#F1F2F5; --surface:#FFFFFF; --surface-2:#F7F8FA; --ink:#14161A; --muted:#5B6169;
-  --line:#DCDFE4; --warn:#8A4B06; --warn-soft:#FDF3E7; --warn-line:#E7C79A;
-  --pass-soft:#E8F6F4; --pass-ink:#0B7B70; --pass-line:#9AD6CF;
-  --brand:#E20074; --code-bg:#EDEFF2; --shadow:0 18px 40px rgba(20,22,26,.12);
-  --font-sans:'IBM Plex Sans',"Segoe UI",Arial,sans-serif;
-  --font-mono:'IBM Plex Mono',ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --paper:#EEF0F3; --surface:#FFFFFF; --surface-2:#F6F7F9; --ink:#14161A; --muted:#666C76;
+  --line:#DDE0E5; --warn:#8A4B06; --warn-soft:#FDF3E7; --warn-line:#E7C79A;
+  --ok-soft:#E8F6F4; --ok-ink:#0B7B70; --ok-line:#9AD6CF;
+  --brand:#E20074; --shadow:0 14px 34px rgba(20,22,26,.13);
+  --font:'IBM Plex Sans',"Segoe UI",Arial,sans-serif;
   --font-slide:"TeleNeo Office","TeleNeo","Segoe UI",Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#15171B; --surface:#1C1F25; --surface-2:#22262D; --ink:#F1F2F4; --muted:#9BA1AC;
-    --line:#2C3038; --warn:#F0A742; --warn-soft:#2E2313; --warn-line:#6B4C1E;
-    --pass-soft:#0F2723; --pass-ink:#54D6C6; --pass-line:#1F4F49;
-    --brand:#FF4B9E; --code-bg:#22262D; --shadow:0 18px 40px rgba(0,0,0,.5);
+    --paper:#131519; --surface:#1B1E23; --surface-2:#22252B; --ink:#F1F2F4; --muted:#99A0AA;
+    --line:#2B2F36; --warn:#F0A742; --warn-soft:#2E2313; --warn-line:#6B4C1E;
+    --ok-soft:#0F2723; --ok-ink:#54D6C6; --ok-line:#1F4F49;
+    --brand:#FF4B9E; --shadow:0 14px 34px rgba(0,0,0,.5);
   }
 }
 :root[data-theme="dark"]{
-  --paper:#15171B; --surface:#1C1F25; --surface-2:#22262D; --ink:#F1F2F4; --muted:#9BA1AC;
-  --line:#2C3038; --warn:#F0A742; --warn-soft:#2E2313; --warn-line:#6B4C1E;
-  --pass-soft:#0F2723; --pass-ink:#54D6C6; --pass-line:#1F4F49;
-  --brand:#FF4B9E; --code-bg:#22262D; --shadow:0 18px 40px rgba(0,0,0,.5);
+  --paper:#131519; --surface:#1B1E23; --surface-2:#22252B; --ink:#F1F2F4; --muted:#99A0AA;
+  --line:#2B2F36; --warn:#F0A742; --warn-soft:#2E2313; --warn-line:#6B4C1E;
+  --ok-soft:#0F2723; --ok-ink:#54D6C6; --ok-line:#1F4F49;
+  --brand:#FF4B9E; --shadow:0 14px 34px rgba(0,0,0,.5);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-sans)}
-h1,h2,h3{margin:0;text-wrap:balance}
-p{margin:0}
-.mono{font-family:var(--font-mono)}
-.page{max-width:1280px;margin:0 auto;padding:30px 22px 52px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font)}
+.wrap{max-width:1220px;margin:0 auto;padding:22px 20px 40px}
 
-.masthead{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:16px}
-.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--brand);font-weight:600}
-.masthead h1{font-size:clamp(22px,2.8vw,29px);font-weight:700;line-height:1.15}
-.masthead .lede{font-size:14px;line-height:1.55;color:var(--muted);max-width:76ch}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.top h1{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em}
+.top .sub{font-size:12px;color:var(--muted)}
+.top .grow{flex:1}
+.chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;border-radius:100px;padding:6px 13px;border:1px solid var(--ok-line);background:var(--ok-soft);color:var(--ok-ink);cursor:pointer}
+.chip.warn{border-color:var(--warn-line);background:var(--warn-soft);color:var(--warn)}
+.chip .d{width:7px;height:7px;border-radius:50%;background:currentColor}
+.btn{font-family:var(--font);font-size:13px;font-weight:700;background:var(--brand);color:#fff;border:0;border-radius:9px;padding:10px 17px;cursor:pointer}
+.btn:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
 
-.masterbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:11px 15px;margin-bottom:14px}
-.masterbar .dot{width:9px;height:9px;border-radius:50%;background:var(--pass-ink);flex:none}
-.masterbar .info{display:flex;flex-direction:column;gap:2px;min-width:0}
-.masterbar .info b{font-size:12.5px;font-weight:700}
-.masterbar .info span{font-family:var(--font-mono);font-size:10.5px;color:var(--muted)}
-.masterbar .spacer{flex:1}
-.filebtn{font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:8px;padding:7px 11px;cursor:pointer}
-.filebtn input{display:none}
-
-.deck{display:grid;grid-template-columns:224px 1fr 300px;gap:16px;align-items:start}
-@media(max-width:1080px){.deck{grid-template-columns:1fr}}
-
-.nav{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:7px;display:flex;flex-direction:column;gap:2px;max-height:600px;overflow:auto}
-.nav button{display:grid;grid-template-columns:26px 1fr 12px;gap:7px;align-items:center;text-align:left;border:0;background:transparent;color:var(--muted);border-radius:7px;padding:7px 8px;cursor:pointer;font-family:var(--font-sans)}
+.main{display:grid;grid-template-columns:196px 1fr;gap:16px;align-items:start}
+@media(max-width:840px){.main{grid-template-columns:1fr}}
+.nav{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:6px;display:flex;flex-direction:column;gap:1px;max-height:70vh;overflow:auto}
+.nav button{display:grid;grid-template-columns:24px 1fr 8px;gap:8px;align-items:center;text-align:left;border:0;background:transparent;color:var(--muted);border-radius:7px;padding:8px;cursor:pointer;font-family:var(--font)}
 .nav button:hover{background:var(--surface-2)}
 .nav button.active{background:var(--ink);color:var(--paper)}
-.nav .num{font-family:var(--font-mono);font-size:10px;opacity:.75}
-.nav .lbl{font-size:11.5px;font-weight:600;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.nav .flag{width:7px;height:7px;border-radius:50%;background:var(--pass-ink)}
-.nav .flag.warn{background:var(--warn)}
+.nav .n{font-size:10px;opacity:.7;font-variant-numeric:tabular-nums}
+.nav .t{font-size:11.5px;font-weight:600;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.nav .f{width:6px;height:6px;border-radius:50%;background:transparent}
+.nav .f.warn{background:var(--warn)}
 
-.stage{min-width:0}
-.slide-frame{position:relative;width:100%;aspect-ratio:13.3333/7.5;background:#fff;border-radius:8px;overflow:hidden;box-shadow:var(--shadow)}
+.frame{position:relative;width:100%;aspect-ratio:13.3333/7.5;background:#fff;border-radius:8px;overflow:hidden;box-shadow:var(--shadow)}
 .obj{position:absolute;font-family:var(--font-slide);white-space:pre-wrap;overflow:hidden}
-.obj.icon-obj svg{width:100%;height:100%;display:block}
-.grid-overlay{position:absolute;inset:0;pointer-events:none;display:none}
-.grid-overlay.show{display:block}
-.grid-overlay .col{position:absolute;top:0;bottom:0;background:rgba(226,0,116,.05);border-left:1px dashed rgba(120,120,130,.35);border-right:1px dashed rgba(120,120,130,.35)}
-.grid-overlay .safe{position:absolute;border:1.5px dashed rgba(20,22,26,.4)}
-.grid-overlay .zone{position:absolute;border:1px dashed rgba(226,0,116,.55)}
-.stagebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px}
-.stagebar .note{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);flex:1;min-width:200px}
-.sel{font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 9px;max-width:190px}
-.toggle{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);cursor:pointer;user-select:none}
-.toggle input{accent-color:var(--brand)}
+.obj.icon svg,.obj.img img{width:100%;height:100%;display:block}
+.obj.img img{object-fit:contain;object-position:right center}
+.stagefoot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px;font-size:11.5px;color:var(--muted)}
+.stagefoot .grow{flex:1}
+.navbtn{font-family:var(--font);font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:7px;padding:5px 11px;cursor:pointer}
 
-.side{display:flex;flex-direction:column;gap:13px}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
-.panel h4{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:9px}
-.gate-status{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;padding:9px 11px;border-radius:8px;margin-bottom:9px}
-.gate-status.blocked{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
-.gate-status.ready{background:var(--pass-soft);color:var(--pass-ink);border:1px solid var(--pass-line)}
-.btn{width:100%;font-size:12.5px;font-weight:700;background:var(--brand);color:#fff;border:0;border-radius:8px;padding:10px 12px;cursor:pointer;margin-bottom:6px}
-.btn.secondary{background:var(--ink);color:var(--paper)}
-.btn:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
-.export-status{font-size:11px;color:var(--muted);display:block;margin-top:5px;line-height:1.45}
-.qa-row{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-top:1px solid var(--line)}
+.qa{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:12px 15px}
+.qa[hidden]{display:none}
+.qa h4{margin:0 0 9px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.qa-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
 .qa-row:first-of-type{border-top:none;padding-top:0}
-.qa-badge{font-family:var(--font-mono);font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;flex:none;margin-top:1px}
-.qa-badge.pass{background:var(--pass-soft);color:var(--pass-ink);border:1px solid var(--pass-line)}
+.qa-badge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;flex:none;margin-top:1px;font-variant-numeric:tabular-nums}
+.qa-badge.pass{background:var(--ok-soft);color:var(--ok-ink);border:1px solid var(--ok-line)}
 .qa-badge.warn{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
-.qa-text b{display:block;font-size:12px;font-weight:600;margin-bottom:1px}
+.qa-text b{display:block;font-size:12px;font-weight:600}
 .qa-text span{font-size:11px;color:var(--muted);line-height:1.4}
 
-.editor{margin-top:18px}
-.editor h4{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-bottom:7px}
-textarea{width:100%;min-height:200px;background:var(--code-bg);border:1px solid var(--line);border-radius:9px;padding:11px 13px;font-family:var(--font-mono);font-size:11px;line-height:1.55;color:var(--ink);resize:vertical}
-.editor-actions{display:flex;align-items:center;gap:9px;margin-top:7px}
-.btn-apply{font-size:12px;font-weight:700;background:var(--ink);color:var(--paper);border:0;border-radius:7px;padding:7px 13px;cursor:pointer}
-.editor-err{font-size:11px;color:var(--warn)}
-
-.limits{margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
-.limits h4{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:9px}
-.limits ul{margin:0;padding-left:17px;display:grid;gap:5px}
-.limits li{font-size:11.5px;color:var(--muted);line-height:1.5}
-footer.foot{margin-top:22px;padding-top:14px;border-top:1px solid var(--line);font-size:10.5px;color:var(--muted);line-height:1.6}
+.settings{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:15px 17px}
+.settings h4{margin:0 0 12px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.srow{display:grid;grid-template-columns:220px 1fr;gap:18px;align-items:start}
+@media(max-width:760px){.srow{grid-template-columns:1fr}}
+.logobox{display:flex;flex-direction:column;gap:8px}
+.logoprev{height:56px;border:1px dashed var(--line);border-radius:8px;display:grid;place-items:center;background:var(--surface-2);overflow:hidden}
+.logoprev img{max-width:90%;max-height:44px;object-fit:contain}
+.logoprev span{font-size:11px;color:var(--muted)}
+.logoacts{display:flex;gap:7px}
+.filebtn{font-size:11.5px;font-weight:600;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:7px;padding:6px 11px;cursor:pointer}
+.filebtn input{display:none}
+.fields{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:620px){.fields{grid-template-columns:1fr}}
+label.fl{display:flex;flex-direction:column;gap:5px;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700}
+input[type=text]{font-family:var(--font);font-size:12.5px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:8px 10px}
+input[type=text]:focus{outline:2px solid var(--brand);outline-offset:1px}
+.opts{display:flex;gap:16px;align-items:center;margin-top:12px;font-size:12px;color:var(--muted)}
+.opts label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.opts input{accent-color:var(--brand)}
+.foot{margin-top:16px;font-size:11px;color:var(--muted);line-height:1.6}
+.status{font-size:11.5px;color:var(--muted)}
 </style>
 
-<div class="page">
-  <header class="masthead">
-    <span class="eyebrow">StoryCraft · v59 · eine Berechnungsquelle</span>
-    <h1>Management Pitch — Vorschau und PowerPoint aus derselben Objektliste</h1>
-    <p class="lede">Die zehn Folien werden aus Inhalt plus Raster berechnet, nicht aus gemessenen DOM-Positionen. Was Sie hier sehen, schreibt der Export in Ihren Unternehmensmaster — Theme, Layouts, Fußzeile und Foliennummer bleiben verknüpft.</p>
-  </header>
-
-  <div class="masterbar">
-    <span class="dot" id="masterDot"></span>
-    <div class="info">
-      <b id="masterName">Master wird geladen…</b>
-      <span id="masterMeta">—</span>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1 id="deckTitle">StoryCraft</h1>
+      <div class="sub" id="deckSub">—</div>
     </div>
-    <div class="spacer"></div>
-    <label class="filebtn">Anderen Master laden<input type="file" id="masterFile" accept=".pptx,.potx"></label>
+    <div class="grow"></div>
+    <button class="chip" id="gateChip" aria-expanded="false"><span class="d"></span><span id="gateText">Prüfe…</span></button>
+    <button class="btn" id="exportBtn" disabled>PowerPoint exportieren</button>
   </div>
 
-  <div class="deck">
-    <nav class="nav" id="slideNav"></nav>
-
-    <div class="stage">
-      <div class="slide-frame" id="frame"><div class="grid-overlay" id="gridOverlay"></div></div>
-      <div class="stagebar">
-        <span class="note" id="frameNote">—</span>
-        <select class="sel" id="layoutSelect"></select>
-        <label class="toggle"><input type="checkbox" id="gridToggle"> Raster</label>
+  <div class="main">
+    <nav class="nav" id="nav"></nav>
+    <div>
+      <div class="frame" id="frame"></div>
+      <div class="stagefoot">
+        <button class="navbtn" id="prevBtn">←</button>
+        <button class="navbtn" id="nextBtn">→</button>
+        <span id="stageNote">—</span>
+        <span class="grow"></span>
+        <span class="status" id="exportStatus"></span>
       </div>
-
-      <div class="editor">
-        <h4>Inhalt dieser Folie (JSON) — Story und Struktur kommen aus dem Chat, hier landen sie</h4>
-        <textarea id="contentEditor" spellcheck="false"></textarea>
-        <div class="editor-actions">
-          <button class="btn-apply" id="applyBtn">Anwenden</button>
-          <span class="editor-err" id="editorErr"></span>
-        </div>
-      </div>
-    </div>
-
-    <div class="side">
-      <div class="panel">
-        <div class="gate-status" id="gateStatus">Prüfe…</div>
-        <button class="btn" id="exportAllBtn" disabled>Ganzes Deck als .pptx</button>
-        <button class="btn secondary" id="exportBtn" disabled>Nur diese Folie</button>
-        <span class="export-status" id="exportStatusText"></span>
-      </div>
-      <div class="panel">
-        <h4>Quality Gate · diese Folie</h4>
+      <div class="qa" id="qaPanel" hidden>
+        <h4>Prüfung dieser Folie</h4>
         <div id="qaList"></div>
       </div>
     </div>
   </div>
 
-  <div class="limits">
-    <h4>Was gegenüber v58 anders ist</h4>
-    <ul>
-      <li><b>Eine Layout-Berechnung statt vier.</b> v58 hatte vier konkurrierende Engines, die dieselbe Position mit unterschiedlichen Werten schrieben; die zuletzt feuernde gewann. Hier berechnet eine deterministische Funktion Titelgröße und Inhaltsbeginn — gleiches Ergebnis in Vorschau und Export, unabhängig von Timing und Fenstergröße.</li>
-      <li><b>Kein Messen versteckter Folien.</b> v58 maß auch <span class="mono">display:none</span>-Folien, bekam 0 zurück und schrieb <span class="mono">NaN%</span> auf 9 von 10 Folien. Hier fließen keine DOM-Messungen in die Geometrie ein.</li>
-      <li><b>Export existiert.</b> v58 verlinkte nur eine Nachbardatei (<span class="mono">v46</span>-Name in einer <span class="mono">v58</span>-Datei). Hier werden die Folien aus derselben Objektliste erzeugt, die die Vorschau zeichnet, und in das Master-Paket geschrieben.</li>
-      <li><b>Der Export ist gesperrt, solange etwas nicht stimmt</b> — Satzspiegel, Überlappung, Bündigkeit, Kontrast und Textüberlauf werden je Folie geprüft.</li>
-    </ul>
+  <div class="settings">
+    <h4>Kopf- und Fußzeile</h4>
+    <div class="srow">
+      <div class="logobox">
+        <div class="logoprev" id="logoPrev"><span>Kein Logo</span></div>
+        <div class="logoacts">
+          <label class="filebtn">Logo wählen<input type="file" id="logoFile" accept="image/png,image/jpeg"></label>
+          <button class="filebtn" id="logoClear">Entfernen</button>
+        </div>
+      </div>
+      <div>
+        <div class="fields">
+          <label class="fl">Fußzeile links<input type="text" id="fLeft" placeholder="intern"></label>
+          <label class="fl">Fußzeile mitte<input type="text" id="fMid" placeholder="Bereich"></label>
+          <label class="fl">Fußzeile rechts<input type="text" id="fRight" placeholder="Titel der Unterlage"></label>
+        </div>
+        <div class="opts">
+          <label><input type="checkbox" id="optNum" checked> Foliennummern</label>
+          <label><input type="checkbox" id="optGrid"> Raster einblenden</label>
+          <label class="filebtn" style="margin-left:auto">Anderen Master laden<input type="file" id="masterFile" accept=".pptx,.potx"></label>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <footer class="foot">Piktogramme sind ein an Lucide angelehntes Strichset aus Grundformen und werden als gruppierte, in PowerPoint editierbare Vektorformen exportiert. Die Vorschau nutzt TeleNeo Office, sofern lokal installiert.</footer>
+  <p class="foot" id="footNote">—</p>
 </div>
 
 <script>
@@ -183,21 +161,22 @@ var MASTER_B64 = "__MASTER_B64__";
   "use strict";
   var E = window.StoryCraft, G = E.G;
   var THEME = E.DEFAULT_THEME;
-  var masterData = null, layoutNames = [];
-  var deck = JSON.parse(JSON.stringify(DECK_CONTENT));
-  var layoutState = deck.map(function(d){ return E.TEMPLATES[d.template].layout; });
-  var active = 0, scenes = [], gates = [];
+  var masterData = null, masterLabel = '';
+  var deck = DECK_CONTENT;
+  var opts = { logo:null, footer:{left:'',middle:'',right:''}, slideNumbers:true };
+  var active = 0, scenes = [], warns = [];
 
   function pct(v,total){ return (v/total*100).toFixed(3)+'%'; }
   function b64ToBytes(b64){
     var bin = atob(b64), out = new Uint8Array(bin.length);
-    for(var i=0;i<bin.length;i++) out[i] = bin.charCodeAt(i);
+    for(var i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
     return out;
   }
+  function store(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function load(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+
   function sceneFor(i){
-    var s = E.buildScene(deck[i].template, deck[i].content, THEME);
-    s.layoutName = layoutState[i];
-    return s;
+    return E.buildScene(deck[i].template, deck[i].content, THEME, opts, i, deck.length);
   }
   function titleOf(i){
     var c = deck[i].content;
@@ -207,39 +186,24 @@ var MASTER_B64 = "__MASTER_B64__";
   // ---------- master ----------
   async function loadMaster(data, label){
     var zip = await JSZip.loadAsync(data);
-    var themeFile = zip.file('ppt/theme/theme1.xml');
-    if(!themeFile) throw new Error('Kein Theme im Paket gefunden');
-    THEME = E.parseTheme(await themeFile.async('string'));
-    layoutNames = [];
-    var paths = Object.keys(zip.files)
-      .filter(function(p){ return /^ppt\/slideLayouts\/slideLayout\d+\.xml$/.test(p); })
-      .sort(function(a,b){ return parseInt(a.match(/(\d+)/)[1],10)-parseInt(b.match(/(\d+)/)[1],10); });
-    for(var i=0;i<paths.length;i++) layoutNames.push(E.parseLayoutName(await zip.file(paths[i]).async('string')));
-    masterData = data;
-    document.getElementById('masterName').textContent = THEME.name || label;
-    document.getElementById('masterMeta').textContent =
-      layoutNames.length+' Layouts · '+(THEME.fonts.minor||'—')+' · '+THEME.colors.tx2+' / '+THEME.colors.accent1;
+    var tf = zip.file('ppt/theme/theme1.xml');
+    if(!tf) throw new Error('Kein Theme im Paket');
+    THEME = E.parseTheme(await tf.async('string'));
+    masterData = data; masterLabel = label;
     document.body.style.setProperty('--font-slide','"'+(THEME.fonts.minor||'Segoe UI')+'","Segoe UI",Arial,sans-serif');
-    fillLayoutSelect();
+    document.getElementById('footNote').textContent =
+      'Master: '+(THEME.name||label)+' · Schrift '+(THEME.fonts.minor||'—')
+      +' · Inhalte liegen als DECK_CONTENT im Kopf dieser Datei und werden per Prompt gesetzt.';
     rebuild();
-  }
-  function fillLayoutSelect(){
-    var sel = document.getElementById('layoutSelect');
-    sel.innerHTML = '';
-    var names = layoutNames.length ? layoutNames : [E.TEMPLATES[deck[active].template].layout];
-    names.forEach(function(n){
-      var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o);
-    });
-    sel.value = layoutState[active];
   }
 
   // ---------- render ----------
-  function renderScene(scene){
-    var frame = document.getElementById('frame'), overlay = document.getElementById('gridOverlay');
-    Array.prototype.slice.call(frame.querySelectorAll('.obj')).forEach(function(n){ n.remove(); });
+  function render(scene){
+    var frame = document.getElementById('frame');
+    frame.innerHTML = '';
     scene.objs.forEach(function(o){
       var d = document.createElement('div');
-      d.className = 'obj' + (o.type==='icon' ? ' icon-obj' : '');
+      d.className = 'obj' + (o.type==='icon' ? ' icon' : '') + (o.type==='image' ? ' img' : '');
       d.style.left = pct(o.x,G.W); d.style.top = pct(o.y,G.H);
       d.style.width = pct(o.w,G.W); d.style.height = pct(o.h,G.H);
       if(o.type==='box'){
@@ -253,236 +217,264 @@ var MASTER_B64 = "__MASTER_B64__";
         d.style.color = '#'+o.color.hex;
         d.style.lineHeight = String(o.leading||1.2);
         d.style.textAlign = o.align||'left';
-        d.style.display = 'flex';
+        d.style.display='flex';
         d.style.alignItems = o.valign==='mid' ? 'center' : 'flex-start';
         d.style.justifyContent = o.align==='center' ? 'center' : (o.align==='right' ? 'flex-end' : 'flex-start');
         d.textContent = o.value||'';
       } else if(o.type==='icon'){
         d.innerHTML = E.svgFor(o.name, o.color.hex);
+      } else if(o.type==='image' && opts.logo){
+        var img = document.createElement('img'); img.src = opts.logo.url; img.alt='Logo';
+        d.appendChild(img);
       }
       frame.appendChild(d);
     });
-    frame.appendChild(overlay);
+    if(document.getElementById('optGrid').checked) addGrid(frame);
     frame.style.setProperty('--pxpi', (frame.clientWidth/G.W).toFixed(3));
-    renderOverlay(overlay);
   }
-  function renderOverlay(overlay){
-    overlay.innerHTML = '';
+  function addGrid(frame){
+    var ov = document.createElement('div');
+    ov.style.cssText='position:absolute;inset:0;pointer-events:none';
     var safe = document.createElement('div');
-    safe.className = 'safe';
-    safe.style.left = pct(G.SAFE.left,G.W); safe.style.top = pct(G.SAFE.top,G.H);
-    safe.style.right = pct(G.W-G.SAFE.right,G.W); safe.style.bottom = pct(G.H-G.SAFE.bottom,G.H);
-    overlay.appendChild(safe);
-    var zone = document.createElement('div');
-    zone.className = 'zone';
-    zone.style.left = pct(G.TITLE.x,G.W); zone.style.top = pct(G.TITLE.y,G.H);
-    zone.style.width = pct(G.TITLE.w,G.W); zone.style.height = pct(G.TITLE.h,G.H);
-    overlay.appendChild(zone);
+    safe.style.cssText='position:absolute;border:1.5px dashed rgba(20,22,26,.4)';
+    safe.style.left=pct(G.SAFE.left,G.W); safe.style.top=pct(G.SAFE.top,G.H);
+    safe.style.right=pct(G.W-G.SAFE.right,G.W); safe.style.bottom=pct(G.H-G.SAFE.bottom,G.H);
+    ov.appendChild(safe);
     for(var c=0;c<G.COLS;c++){
-      var col = document.createElement('div');
-      col.className = 'col';
-      col.style.left = pct(E.colX(c),G.W); col.style.width = pct(G.COLW,G.W);
-      overlay.appendChild(col);
+      var col=document.createElement('div');
+      col.style.cssText='position:absolute;top:0;bottom:0;background:rgba(226,0,116,.05);border-left:1px dashed rgba(120,120,130,.3);border-right:1px dashed rgba(120,120,130,.3)';
+      col.style.left=pct(E.colX(c),G.W); col.style.width=pct(G.COLW,G.W);
+      ov.appendChild(col);
     }
+    frame.appendChild(ov);
   }
 
   // ---------- gate ----------
   function paintGate(rows){
     document.getElementById('qaList').innerHTML = rows.map(function(r){
-      var badge = r.status==='pass' ? 'pass' : 'warn';
-      var label = r.status==='pass' ? 'PASS' : (r.status==='pending' ? '…' : 'WARN');
+      var k = r.status==='pass' ? 'pass' : 'warn';
+      var l = r.status==='pass' ? 'PASS' : (r.status==='pending' ? '…' : 'WARN');
       return '<div class="qa-row"'+(r.id?' data-row-id="'+r.id+'"':'')+'>'
-        + '<span class="qa-badge '+badge+'">'+label+'</span>'
-        + '<span class="qa-text"><b>'+r.title+'</b><span>'+r.detail+'</span></span></div>';
+        +'<span class="qa-badge '+k+'">'+l+'</span>'
+        +'<span class="qa-text"><b>'+r.title+'</b><span>'+r.detail+'</span></span></div>';
     }).join('');
   }
-  function updateStatus(){
-    var warnHere = document.querySelectorAll('#qaList .qa-badge.warn').length;
-    var warnDeck = gates.filter(function(g){ return g; }).length;
-    var el = document.getElementById('gateStatus');
-    var bAll = document.getElementById('exportAllBtn'), bOne = document.getElementById('exportBtn');
-    if(!masterData){
-      el.className = 'gate-status blocked'; el.textContent = 'Kein Master geladen';
-      bAll.disabled = true; bOne.disabled = true; return;
-    }
-    if(warnDeck>0){
-      el.className = 'gate-status blocked';
-      el.textContent = warnDeck+' von '+deck.length+' Folien mit WARN';
-    } else {
-      el.className = 'gate-status ready';
-      el.textContent = 'Alle '+deck.length+' Folien bestanden';
-    }
-    bAll.disabled = warnDeck>0;
-    bOne.disabled = warnHere>0;
-    Array.prototype.forEach.call(document.querySelectorAll('#slideNav .flag'), function(f,i){
-      f.classList.toggle('warn', !!gates[i]);
+  function refreshStatus(){
+    var n = warns.filter(Boolean).length;
+    var chip = document.getElementById('gateChip');
+    chip.classList.toggle('warn', n>0);
+    document.getElementById('gateText').textContent = n>0
+      ? n+' von '+deck.length+' Folien prüfen'
+      : 'Alle '+deck.length+' Folien geprüft';
+    document.getElementById('exportBtn').disabled = (n>0 || !masterData);
+    if(!masterData) document.getElementById('gateText').textContent = 'Kein Master geladen';
+    Array.prototype.forEach.call(document.querySelectorAll('#nav .f'), function(f,i){
+      f.classList.toggle('warn', !!warns[i]);
     });
   }
   function checkOverflow(){
     requestAnimationFrame(function(){
       setTimeout(function(){
-        var frame = document.getElementById('frame');
-        var clipped = Array.prototype.filter.call(frame.querySelectorAll('[data-check="overflow"]'), function(e){
-          return e.scrollHeight > e.clientHeight+2 || e.scrollWidth > e.clientWidth+2;
-        });
+        var clipped = Array.prototype.filter.call(
+          document.querySelectorAll('#frame [data-check="overflow"]'), function(e){
+            return e.scrollHeight>e.clientHeight+2 || e.scrollWidth>e.clientWidth+2;
+          });
         var row = document.querySelector('[data-row-id="overflow"]');
         if(row){
-          var badge = row.querySelector('.qa-badge'), text = row.querySelector('.qa-text');
+          var b = row.querySelector('.qa-badge'), t = row.querySelector('.qa-text');
           if(clipped.length){
-            badge.className='qa-badge warn'; badge.textContent='WARN';
-            text.innerHTML = '<b>Text-Overflow</b><span>'+clipped.length+' Textbox(en) potenziell abgeschnitten.</span>';
-            gates[active] = true;
+            b.className='qa-badge warn'; b.textContent='WARN';
+            t.innerHTML='<b>Text-Overflow</b><span>'+clipped.length+' Textbox(en) abgeschnitten.</span>';
+            warns[active]=true;
           } else {
-            badge.className='qa-badge pass'; badge.textContent='PASS';
-            text.innerHTML = '<b>Text-Overflow</b><span>Keine abgeschnittenen Texte erkannt.</span>';
+            b.className='qa-badge pass'; b.textContent='PASS';
+            t.innerHTML='<b>Text-Overflow</b><span>Keine abgeschnittenen Texte.</span>';
           }
         }
-        updateStatus();
-      }, 120);
+        refreshStatus();
+      }, 110);
     });
   }
 
   // ---------- deck ----------
-  function rebuild(){
-    scenes = deck.map(function(_,i){ return sceneFor(i); });
-    gates = scenes.map(function(s){
-      return E.computeGate(s).some(function(r){ return r.status==='warn'; });
-    });
-    show(active);
-  }
   function buildNav(){
-    var nav = document.getElementById('slideNav');
-    nav.innerHTML = '';
+    var nav = document.getElementById('nav');
+    nav.innerHTML='';
     deck.forEach(function(d,i){
       var b = document.createElement('button');
-      b.innerHTML = '<span class="num">'+String(i+1).padStart(2,'0')+'</span>'
-        + '<span class="lbl"></span><span class="flag"></span>';
-      b.querySelector('.lbl').textContent = titleOf(i);
+      b.innerHTML = '<span class="n">'+String(i+1).padStart(2,'0')+'</span><span class="t"></span><span class="f"></span>';
+      b.querySelector('.t').textContent = titleOf(i);
       b.addEventListener('click', function(){ show(i); });
       nav.appendChild(b);
     });
   }
+  function rebuild(){
+    scenes = deck.map(function(_,i){ return sceneFor(i); });
+    warns = scenes.map(function(s){ return E.computeGate(s).some(function(r){ return r.status==='warn'; }); });
+    show(active);
+  }
   function show(i){
     active = Math.max(0, Math.min(deck.length-1, i));
-    Array.prototype.forEach.call(document.querySelectorAll('#slideNav button'), function(b,idx){
+    Array.prototype.forEach.call(document.querySelectorAll('#nav button'), function(b,idx){
       b.classList.toggle('active', idx===active);
     });
-    var scene = scenes[active] || sceneFor(active);
-    scenes[active] = scene;
-    renderScene(scene);
+    var scene = scenes[active] = sceneFor(active);
+    render(scene);
     var rows = E.computeGate(scene);
-    gates[active] = rows.some(function(r){ return r.status==='warn'; });
+    warns[active] = rows.some(function(r){ return r.status==='warn'; });
     rows.push({status:'pending', title:'Text-Overflow', detail:'Wird geprüft…', id:'overflow'});
     paintGate(rows);
-    updateStatus();
+    refreshStatus();
     checkOverflow();
-    document.getElementById('contentEditor').value = JSON.stringify(deck[active].content, null, 2);
-    document.getElementById('editorErr').textContent = '';
-    document.getElementById('layoutSelect').value = layoutState[active];
-    document.getElementById('frameNote').textContent =
-      'Folie '+(active+1)+'/'+deck.length+' · Muster „'+E.TEMPLATES[deck[active].template].label
-      +'" · Layout „'+scene.layoutName+'" · '+scene.objs.length+' Objekte';
+    document.getElementById('stageNote').textContent = 'Folie '+(active+1)+' von '+deck.length;
+    document.getElementById('deckSub').textContent =
+      deck.length+' Folien · '+(THEME.name||masterLabel||'Master')+' · Export 1:1 aus dieser Ansicht';
   }
 
   // ---------- export ----------
   var downloadsNS = null;
   if(window.claude && window.claude.use){
-    window.claude.use('downloads').then(function(ns){ downloadsNS = ns; }).catch(function(){ downloadsNS = null; });
+    window.claude.use('downloads').then(function(ns){ downloadsNS=ns; }).catch(function(){ downloadsNS=null; });
   }
-  async function deliver(blob, filename, statusEl){
+  async function deliver(blob, filename, el){
     if(downloadsNS){
-      try {
-        var res = await downloadsNS.save({ filename:filename, data:blob });
-        statusEl.textContent = res.status==='saved' ? 'Gespeichert: '+filename : 'Übergeben.';
-      } catch(err){
-        statusEl.textContent = (err && err.code==='declined') ? 'Abgebrochen.' : 'Speichern fehlgeschlagen.';
+      try{
+        var r = await downloadsNS.save({filename:filename, data:blob});
+        el.textContent = r.status==='saved' ? 'Gespeichert' : 'Übergeben';
+      }catch(err){
+        el.textContent = (err && err.code==='declined') ? 'Abgebrochen' : 'Speichern fehlgeschlagen';
       }
       return;
     }
     var url = URL.createObjectURL(blob), a = document.createElement('a');
-    a.href = url; a.download = filename;
+    a.href=url; a.download=filename;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
-    statusEl.textContent = 'Datei erzeugt: '+filename;
+    el.textContent = 'Datei erzeugt';
   }
-  async function runExport(list, filename){
-    var statusEl = document.getElementById('exportStatusText');
-    if(!masterData){ statusEl.textContent = 'Kein Master geladen.'; return; }
-    statusEl.textContent = 'Schreibe Folien in den Master…';
-    try {
-      var zip = await E.injectIntoMaster(JSZip, masterData, list);
+  document.getElementById('exportBtn').addEventListener('click', async function(){
+    var el = document.getElementById('exportStatus');
+    if(!masterData){ el.textContent='Kein Master'; return; }
+    el.textContent = 'Schreibe in den Master…';
+    try{
+      var list = deck.map(function(_,i){ return sceneFor(i); });
+      var zip = await E.injectIntoMaster(JSZip, masterData, list,
+        opts.logo ? { bytes:opts.logo.bytes, ext:opts.logo.ext } : null);
       var blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE',
         mimeType:'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
-      await deliver(blob, filename, statusEl);
-    } catch(err){
-      statusEl.textContent = 'Export fehlgeschlagen: '+(err && err.message ? err.message : err);
+      await deliver(blob, 'StoryCraft_Deck.pptx', el);
+    }catch(err){
+      el.textContent = 'Export fehlgeschlagen: '+(err && err.message ? err.message : err);
     }
-  }
-  document.getElementById('exportAllBtn').addEventListener('click', function(){
-    runExport(deck.map(function(_,i){ return sceneFor(i); }), 'StoryCraft_Management_Pitch.pptx');
-  });
-  document.getElementById('exportBtn').addEventListener('click', function(){
-    runExport([sceneFor(active)], 'StoryCraft_Folie_'+(active+1)+'.pptx');
   });
 
-  // ---------- wiring ----------
-  document.getElementById('layoutSelect').addEventListener('change', function(e){
-    layoutState[active] = e.target.value;
-    scenes[active] = sceneFor(active);
-    show(active);
+  // ---------- settings ----------
+  function applyLogo(dataUrl, bytes, ext, w, h, persist){
+    opts.logo = { url:dataUrl, bytes:bytes, ext:ext, w:w, h:h };
+    var prev = document.getElementById('logoPrev');
+    prev.innerHTML = '';
+    var img = document.createElement('img'); img.src = dataUrl; img.alt='Logo';
+    prev.appendChild(img);
+    if(persist) store('sc.logo', JSON.stringify({d:dataUrl, e:ext, w:w, h:h}));
+    rebuild();
+  }
+  function dataUrlToBytes(d){
+    var b = atob(d.split(',')[1]), out = new Uint8Array(b.length);
+    for(var i=0;i<b.length;i++) out[i]=b.charCodeAt(i);
+    return out;
+  }
+  document.getElementById('logoFile').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0];
+    if(!f) return;
+    var ext = /jpe?g$/i.test(f.name) || f.type==='image/jpeg' ? 'jpeg' : 'png';
+    var r = new FileReader();
+    r.onload = function(){
+      var dataUrl = r.result;
+      var im = new Image();
+      im.onload = function(){ applyLogo(dataUrl, dataUrlToBytes(dataUrl), ext, im.naturalWidth, im.naturalHeight, true); };
+      im.src = dataUrl;
+    };
+    r.readAsDataURL(f);
   });
-  document.getElementById('gridToggle').addEventListener('change', function(e){
-    document.getElementById('gridOverlay').classList.toggle('show', e.target.checked);
+  document.getElementById('logoClear').addEventListener('click', function(){
+    opts.logo = null;
+    document.getElementById('logoPrev').innerHTML = '<span>Kein Logo</span>';
+    try{ localStorage.removeItem('sc.logo'); }catch(e){}
+    rebuild();
   });
-  document.getElementById('applyBtn').addEventListener('click', function(){
-    var ta = document.getElementById('contentEditor'), err = document.getElementById('editorErr');
-    try {
-      deck[active].content = JSON.parse(ta.value);
-      err.textContent = '';
-      scenes[active] = sceneFor(active);
-      buildNav();
-      show(active);
-    } catch(e){ err.textContent = 'Ungültiges JSON: '+e.message; }
+  ['fLeft','fMid','fRight'].forEach(function(id,i){
+    var key = ['left','middle','right'][i];
+    document.getElementById(id).addEventListener('input', function(e){
+      opts.footer[key] = e.target.value;
+      store('sc.footer', JSON.stringify(opts.footer));
+      rebuild();
+    });
   });
+  document.getElementById('optNum').addEventListener('change', function(e){
+    opts.slideNumbers = e.target.checked;
+    store('sc.num', e.target.checked ? '1' : '0');
+    rebuild();
+  });
+  document.getElementById('optGrid').addEventListener('change', function(){ show(active); });
   document.getElementById('masterFile').addEventListener('change', function(e){
     var f = e.target.files && e.target.files[0];
     if(!f) return;
-    var reader = new FileReader();
-    reader.onload = function(){
-      loadMaster(new Uint8Array(reader.result), f.name).catch(function(err){
-        document.getElementById('masterName').textContent = 'Master konnte nicht gelesen werden';
-        document.getElementById('masterMeta').textContent = String(err && err.message ? err.message : err);
-        document.getElementById('masterDot').style.background = 'var(--warn)';
+    var r = new FileReader();
+    r.onload = function(){
+      loadMaster(new Uint8Array(r.result), f.name).catch(function(err){
+        document.getElementById('footNote').textContent = 'Master nicht lesbar: '+(err && err.message ? err.message : err);
       });
     };
-    reader.readAsArrayBuffer(f);
+    r.readAsArrayBuffer(f);
   });
+  document.getElementById('gateChip').addEventListener('click', function(){
+    var p = document.getElementById('qaPanel');
+    p.hidden = !p.hidden;
+    this.setAttribute('aria-expanded', String(!p.hidden));
+  });
+  document.getElementById('prevBtn').addEventListener('click', function(){ show(active-1); });
+  document.getElementById('nextBtn').addEventListener('click', function(){ show(active+1); });
   document.addEventListener('keydown', function(e){
     if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     if(e.key==='ArrowRight') show(active+1);
     if(e.key==='ArrowLeft') show(active-1);
   });
   window.addEventListener('resize', function(){
-    var frame = document.getElementById('frame');
-    frame.style.setProperty('--pxpi', (frame.clientWidth/G.W).toFixed(3));
+    var f = document.getElementById('frame');
+    f.style.setProperty('--pxpi', (f.clientWidth/G.W).toFixed(3));
   });
 
   // ---------- init ----------
+  function restore(){
+    var f = load('sc.footer');
+    if(f){ try{
+      opts.footer = JSON.parse(f);
+      document.getElementById('fLeft').value = opts.footer.left||'';
+      document.getElementById('fMid').value = opts.footer.middle||'';
+      document.getElementById('fRight').value = opts.footer.right||'';
+    }catch(e){} }
+    var n = load('sc.num');
+    if(n!==null){ opts.slideNumbers = n==='1'; document.getElementById('optNum').checked = opts.slideNumbers; }
+    var l = load('sc.logo');
+    if(l){ try{
+      var o = JSON.parse(l);
+      opts.logo = { url:o.d, bytes:dataUrlToBytes(o.d), ext:o.e, w:o.w, h:o.h };
+      var prev = document.getElementById('logoPrev'); prev.innerHTML='';
+      var img = document.createElement('img'); img.src=o.d; img.alt='Logo'; prev.appendChild(img);
+    }catch(e){} }
+  }
   function init(){
+    restore();
     buildNav();
     rebuild();
-    if(MASTER_B64 && MASTER_B64.length > 100){
+    if(MASTER_B64 && MASTER_B64.length>100){
       loadMaster(b64ToBytes(MASTER_B64), 'Eingebetteter Master').catch(function(err){
-        document.getElementById('masterName').textContent = 'Eingebetteter Master nicht lesbar';
-        document.getElementById('masterMeta').textContent = String(err && err.message ? err.message : err);
-        document.getElementById('masterDot').style.background = 'var(--warn)';
-        updateStatus();
+        document.getElementById('footNote').textContent = 'Eingebetteter Master nicht lesbar: '+(err && err.message ? err.message : err);
+        refreshStatus();
       });
     } else {
-      document.getElementById('masterName').textContent = 'Kein Master eingebettet';
-      document.getElementById('masterMeta').textContent = 'Bitte Master-Datei laden';
-      document.getElementById('masterDot').style.background = 'var(--warn)';
-      updateStatus();
+      document.getElementById('footNote').textContent = 'Kein Master eingebettet — bitte über „Anderen Master laden" wählen.';
+      refreshStatus();
     }
   }
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(init); else init();

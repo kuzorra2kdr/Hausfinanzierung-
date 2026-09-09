@@ -15,6 +15,9 @@ G.COLW = (G.W - 2*G.MARGIN - (G.COLS-1)*G.GUTTER) / G.COLS;
 // Safe area as the master defines it: side margins from the content placeholders,
 // top from the title, bottom from the footer band.
 G.SAFE = { left:G.MARGIN, right:G.W-G.MARGIN, top:0.44, bottom:7.06 };
+G.FOOTER = { x:0.524, y:7.062, w:9.135, h:0.354 };
+G.SLDNUM = { x:12.533, y:7.062, w:0.276, h:0.354 };
+G.LOGO   = { right:12.81, y:0.30, maxH:0.62, maxW:2.2 };
 function colX(c){ return G.MARGIN + c*(G.COLW+G.GUTTER); }
 function colW(span){ return span*G.COLW + (span-1)*G.GUTTER; }
 
@@ -109,10 +112,12 @@ function fitTitleSize(text, widthIn, maxHeightIn){
   return { size:24, lines:2, h:2*24*TITLE_LEADING/72 };
 }
 // Header block: title placeholder + subtitle. Returns where content may start.
-function header(c, P, objs){
-  var f = fitTitleSize(c.title, G.TITLE.w, 1.02);
+function header(c, P, objs, opts){
+  var reserve = (opts && opts.logo) ? logoBox(opts.logo).w + 0.3 : 0;
+  var titleW = G.TITLE.w - reserve;
+  var f = fitTitleSize(c.title, titleW, 1.02);
   var boxH = Math.max(G.TITLE.h, f.h * 1.10);
-  objs.push(T('title', G.TITLE.x, G.TITLE.y, G.TITLE.w, boxH,
+  objs.push(T('title', G.TITLE.x, G.TITLE.y, titleW, boxH,
     c.title, f.size, {bold:true, color:P.ink, leading:TITLE_LEADING, placeholder:'title'}));
   var y = G.TITLE.y + boxH + 0.04;
   if(c.subtitle){
@@ -138,10 +143,38 @@ function toneFill(tone, P){
 }
 var STEP_ICONS = ['users','layers','target','check'];
 
+// Logo keeps its aspect ratio inside the reserved corner box.
+function logoBox(logo){
+  var maxH = G.LOGO.maxH, maxW = G.LOGO.maxW;
+  var ratio = (logo.w && logo.h) ? (logo.w/logo.h) : 3;
+  var h = maxH, w = h*ratio;
+  if(w > maxW){ w = maxW; h = w/ratio; }
+  return { x: G.LOGO.right - w, y: G.LOGO.y, w:w, h:h };
+}
+// Master furniture every slide carries: logo, footer, slide number.
+function decorate(scene, P, opts, index, total){
+  opts = opts || {};
+  if(opts.logo){
+    var b = logoBox(opts.logo);
+    scene.objs.push({ id:'logo', type:'image', x:b.x, y:b.y, w:b.w, h:b.h, asset:'logo', furniture:true });
+  }
+  var f = opts.footer || {};
+  var parts = [f.left, f.middle, f.right].filter(function(v){ return v && String(v).trim(); });
+  if(parts.length){
+    scene.objs.push(T('footer', G.FOOTER.x, G.FOOTER.y, G.FOOTER.w, G.FOOTER.h,
+      parts.join('     ·     '), 9, {color:P.soft, valign:'mid', placeholder:'ftr'}));
+  }
+  if(opts.slideNumbers !== false){
+    scene.objs.push(T('sldNum', G.SLDNUM.x, G.SLDNUM.y, G.SLDNUM.w, G.SLDNUM.h,
+      String(index+1).padStart(2,'0'), 9, {color:P.soft, align:'right', valign:'mid', placeholder:'sldNum'}));
+  }
+  return scene;
+}
+
 var TEMPLATES = {
   cover: {
     label:'Cover', layout:'Leer',
-    build:function(c,P){
+    build:function(c,P,opts){
       var objs = [
         T('eyebrow', colX(0), 1.15, colW(7), 0.3, c.eyebrow, 11.5, {bold:true, color:P.accent}),
         T('title', colX(0), 1.62, colW(7), 1.15, c.title, 54, {bold:true, color:P.ink}),
@@ -160,8 +193,8 @@ var TEMPLATES = {
 
   summary: {
     label:'Summary', layout:'Nur Titel',
-    build:function(c,P){
-      var objs = [], top = header(c,P,objs);
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
       objs.push(Bx('badge', colX(0), top, colW(2), 1.5, {fill:P.accent, radius:0.14}));
       objs.push(T('badgeNum', colX(0), top+0.12, colW(2), 0.95, c.badgeNum, 46, {bold:true, color:P.onAccent, align:'center'}));
       objs.push(T('badgeLbl', colX(0), top+1.62, colW(2), 0.9, c.badgeLabel, 11.5, {color:P.soft, leading:1.3}));
@@ -181,8 +214,8 @@ var TEMPLATES = {
 
   statement: {
     label:'Statement', layout:'Nur Titel',
-    build:function(c,P){
-      var objs = [], top = header(c,P,objs);
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
       var lw = colW(6);
       objs.push(T('eyebrow', colX(0), top, lw, 0.28, String(c.eyebrow||'').toUpperCase(), 10.5, {bold:true, color:P.accent}));
       objs.push(T('head', colX(0), top+0.42, lw, 0.78, c.headline, 30, {bold:true, color:P.ink, leading:1.12}));
@@ -205,8 +238,8 @@ var TEMPLATES = {
 
   flow4: {
     label:'Prozess', layout:'Nur Titel',
-    build:function(c,P){
-      var objs = [], top = header(c,P,objs);
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
       var bottom = noteBar(objs, P, c.note, top, 'note');
       var steps = c.steps||[], n = steps.length||1, span = G.COLS/n;
       var h = bottom - top;
@@ -227,8 +260,8 @@ var TEMPLATES = {
 
   grid3: {
     label:'Drei Karten', layout:'Nur Titel',
-    build:function(c,P){
-      var objs = [], top = header(c,P,objs);
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
       var bottom = G.CONTENT_BOTTOM;
       if(c.callout){
         var cy = G.CONTENT_BOTTOM - 0.66;
@@ -253,8 +286,8 @@ var TEMPLATES = {
 
   visionFactors: {
     label:'Prinzip', layout:'Nur Titel',
-    build:function(c,P){
-      var objs = [], top = header(c,P,objs);
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
       var bottom = noteBar(objs, P, c.note, top, 'note');
       var h = bottom - top;
       var tx = colX(0), tw = colW(5);
@@ -280,8 +313,8 @@ var TEMPLATES = {
 
   techGrid: {
     label:'Baukasten', layout:'Nur Titel',
-    build:function(c,P){
-      var objs = [], top = header(c,P,objs);
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
       var h = G.CONTENT_BOTTOM - top;
       var kpis = c.kpis||[], cellW = colW(3.4), gapX = 0.24, cellH = (h-0.22)/2;
       kpis.slice(0,4).forEach(function(k,i){
@@ -311,8 +344,8 @@ var TEMPLATES = {
 
   layers: {
     label:'Architektur', layout:'Nur Titel',
-    build:function(c,P){
-      var objs = [], top = header(c,P,objs);
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
       var bottom = noteBar(objs, P, c.note, top, 'note');
       var uses = c.uses||[], n = uses.length||1, span = G.COLS/n, useH = 1.05;
       uses.forEach(function(u,i){
@@ -333,8 +366,8 @@ var TEMPLATES = {
 
   kpiMosaic: {
     label:'KPI-Mosaik', layout:'Nur Titel',
-    build:function(c,P){
-      var objs = [], top = header(c,P,objs);
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
       var h = G.CONTENT_BOTTOM - top;
       var bigH = h*0.58, lx = colX(0), lw = colW(5);
       var b = c.big||{};
@@ -374,12 +407,12 @@ var TEMPLATES = {
 };
 var TPL_ORDER = ['cover','summary','statement','flow4','grid3','visionFactors','techGrid','layers','kpiMosaic'];
 
-function buildScene(tplKey, content, theme){
+function buildScene(tplKey, content, theme, opts, index, total){
   var P = paletteFor(theme || DEFAULT_THEME);
-  var scene = TEMPLATES[tplKey].build(content, P);
+  var scene = TEMPLATES[tplKey].build(content, P, opts||{});
   scene.layoutName = TEMPLATES[tplKey].layout;
   scene.template = tplKey;
-  return scene;
+  return decorate(scene, P, opts, index||0, total||1);
 }
 
 // ---------- quality gate (pure geometry, no DOM) ----------
@@ -404,8 +437,12 @@ function computeGate(scene){
   var texts = objs.filter(function(o){ return o.type==='text'; });
 
   var worst = 0;
-  objs.filter(function(o){ return o.type!=='icon' && !o.placeholder; }).forEach(function(o){
+  objs.filter(function(o){ return o.type!=='icon' && !o.placeholder && !o.furniture; }).forEach(function(o){
     var over = Math.max(0, (o.x+o.w)-G.SAFE.right, G.SAFE.left-o.x, (o.y+o.h)-G.SAFE.bottom, G.SAFE.top-o.y);
+    if(over>worst) worst = over;
+  });
+  objs.filter(function(o){ return o.furniture; }).forEach(function(o){
+    var over = Math.max(0, (o.x+o.w)-(G.W-0.1), 0.1-o.x, (o.y+o.h)-(G.H-0.1), 0.1-o.y);
     if(over>worst) worst = over;
   });
   rows.push(worst>0.01
@@ -512,6 +549,17 @@ function textXml(o,id){
   var anchor = o.valign==='mid' ? 'ctr' : 't';
   // A title marked as placeholder inherits position and styling from the layout,
   // so it stays a real PowerPoint title (outline, master-driven formatting).
+  if(o.placeholder === 'ftr' || o.placeholder === 'sldNum'){
+    var idx = (o.phIdx===undefined||o.phIdx===null) ? '' : ' idx="'+o.phIdx+'"';
+    var body = o.placeholder === 'sldNum'
+      ? '<a:fld id="{B4B4C0A1-7E1F-4A6E-9C3D-00000000'+String(id).padStart(4,'0')+'}" type="slidenum">'
+        + '<a:rPr lang="de-DE"/><a:t>'+xesc(o.value||'')+'</a:t></a:fld><a:endParaRPr lang="de-DE"/>'
+      : '<a:r><a:rPr lang="de-DE" dirty="0"/><a:t xml:space="preserve">'+xesc(o.value||'')+'</a:t></a:r>';
+    return '<p:sp><p:nvSpPr><p:cNvPr id="'+id+'" name="'+(o.placeholder==='ftr'?'Fußzeile':'Foliennummer')+' '+id+'"/>'
+      + '<p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>'
+      + '<p:nvPr><p:ph type="'+o.placeholder+'" sz="quarter"'+idx+'/></p:nvPr></p:nvSpPr>'
+      + '<p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p>'+body+'</a:p></p:txBody></p:sp>';
+  }
   if(o.placeholder === 'title'){
     return '<p:sp><p:nvSpPr><p:cNvPr id="'+id+'" name="Titel '+id+'"/>'
       + '<p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr>'
@@ -566,12 +614,19 @@ function iconXml(o, startId){
     + out.join('') + '</p:grpSp>';
   return { xml: xml, nextId: id };
 }
+function imageXml(o, id, relId){
+  return '<p:pic><p:nvPicPr><p:cNvPr id="'+id+'" name="'+xesc(o.id||'Bild')+'"/>'
+    + '<p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr>'
+    + '<p:blipFill><a:blip r:embed="'+relId+'"/><a:stretch><a:fillRect/></a:stretch></p:blipFill>'
+    + '<p:spPr>'+xfrm(o)+'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>';
+}
 function buildSlideXml(scene){
   var id = 2, parts = [];
   scene.objs.forEach(function(o){
     if(o.type==='box'){ parts.push(boxXml(o,id++)); }
     else if(o.type==='text'){ parts.push(textXml(o,id++)); }
     else if(o.type==='icon'){ var r = iconXml(o,id); parts.push(r.xml); id = r.nextId; }
+    else if(o.type==='image' && scene._assetRel){ parts.push(imageXml(o, id++, scene._assetRel)); }
   });
   return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
     + '<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"'
@@ -622,8 +677,12 @@ function parseLayoutName(layoutXml){
 // ---------- master injection ----------
 // Writes the generated slides into the ORIGINAL master package, so the result
 // keeps its theme, all layouts, fonts, footers and slide numbers.
-async function injectIntoMaster(JSZip, masterData, scenes){
+async function injectIntoMaster(JSZip, masterData, scenes, logo){
   var zip = await JSZip.loadAsync(masterData);
+  // The logo travels as one media part shared by every slide.
+  var logoName = logo ? ('storycraft-logo.'+(logo.ext||'png')) : null;
+  var logoRel = 'rId9';
+  if(logo){ zip.file('ppt/media/'+logoName, logo.bytes); }
 
   // map layout name -> part name
   var layouts = {};
@@ -654,12 +713,27 @@ async function injectIntoMaster(JSZip, masterData, scenes){
     var layoutPart = layouts[scene.layoutName] || layouts['Leer'] || layoutFiles[0];
     var rid = 'rId' + (maxRid + 1 + s);
 
+    // Footer and slide-number placeholders must carry the idx of THIS layout,
+    // otherwise PowerPoint cannot match them to the master and drops them.
+    var lx = await zip.file(layoutPart).async('string');
+    var phIdx = {};
+    (lx.match(/<p:ph[^>]*\/>/g)||[]).forEach(function(tag){
+      var ty = tag.match(/type="(ftr|sldNum)"/), ix = tag.match(/idx="(\d+)"/);
+      if(ty) phIdx[ty[1]] = ix ? ix[1] : null;
+    });
+    scene.objs.forEach(function(o){
+      if(o.placeholder==='ftr' || o.placeholder==='sldNum') o.phIdx = phIdx[o.placeholder];
+    });
+    scene._assetRel = logoRel;
+
     zip.file('ppt/slides/slide'+n+'.xml', buildSlideXml(scene));
     zip.file('ppt/slides/_rels/slide'+n+'.xml.rels',
       '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
       + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
       + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../'
-      + layoutPart.replace('ppt/','') + '"/></Relationships>');
+      + layoutPart.replace('ppt/','') + '"/>'
+      + (logo ? '<Relationship Id="'+logoRel+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/'+logoName+'"/>' : '')
+      + '</Relationships>');
 
     ctAdds.push('<Override PartName="/ppt/slides/slide'+n+'.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>');
     relAdds.push('<Relationship Id="'+rid+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide'+n+'.xml"/>');

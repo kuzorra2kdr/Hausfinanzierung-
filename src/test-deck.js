@@ -5,14 +5,16 @@ const fs=require('fs'), JSZip=require('jszip'), E=require('./engine.js');
   const probe=await JSZip.loadAsync(masterData);
   const theme=E.parseTheme(await probe.file('ppt/theme/theme1.xml').async('string'));
   const deck=JSON.parse(fs.readFileSync('deck-content.json','utf8'));
-  const scenes=deck.map(d=>E.buildScene(d.template,d.content,theme));
+  const logoBytes=fs.readFileSync('logo.png');
+  const opts={ logo:{w:360,h:96}, footer:{left:'intern', middle:'AI & Data Delivery Hub', right:'StoryCraft · Management Pitch'} };
+  const scenes=deck.map((d,i)=>E.buildScene(d.template,d.content,theme,opts,i,deck.length));
   let bad=0;
   scenes.forEach((s,i)=>{
     const w=E.computeGate(s).filter(r=>r.status==='warn');
-    if(w.length) bad++;
-    console.log(`  ${String(i+1).padStart(2)} ${deck[i].template.padEnd(14)} objs=${String(s.objs.length).padStart(3)} layout="${s.layoutName}" ${w.length? 'WARN: '+w.map(x=>x.title+' ('+x.detail.replace(/^.*?Δ /,'Δ ').replace(/\.$/,'')+')').join(' | ') : 'alle pass'}`);
+    if(w.length){bad++; console.log(`  ${i+1} ${deck[i].template} WARN: ${w.map(x=>x.title).join(', ')}`);}
   });
-  const zip=await E.injectIntoMaster(JSZip,masterData,scenes);
+  console.log(bad? '' : '  alle 10 Folien pass');
+  const zip=await E.injectIntoMaster(JSZip,masterData,scenes,{bytes:logoBytes, ext:'png'});
   fs.writeFileSync('deck.pptx', await zip.generateAsync({type:'nodebuffer',compression:'DEFLATE'}));
-  console.log(`\n${bad} von ${scenes.length} Folien mit WARN | deck.pptx geschrieben`);
+  console.log('deck.pptx geschrieben');
 })().catch(e=>{console.error('FAIL',e);process.exit(1);});
