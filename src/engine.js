@@ -50,6 +50,7 @@ function paletteFor(theme){
     onAccent:       { role:'bg1',     hex:c.bg1 },
     accent:         { role:'tx2',     hex:c.tx2 },
     accentDark:     { role:null,      hex:darken(c.tx2, 0.82) },
+    accentLight:    { role:null,      hex:mixWhite(c.tx2, 0.35) },
     accent2:        { role:'accent1', hex:c.accent1 },
     accent2Dark:    { role:null,      hex:darken(c.accent1, 0.55) },
     soft:           { role:null,      hex:'4B525C' },
@@ -92,7 +93,8 @@ function T(id,x,y,w,h,value,fontSize,o){
 function Bx(id,x,y,w,h,o){
   o = o||{};
   return { id:id, type:'box', x:x, y:y, w:w, h:h, fill:o.fill, line:o.line||null,
-    lineW:o.lineW||0, radius:o.radius||0, peerGroup:o.peerGroup||null, decor:!!o.decor };
+    lineW:o.lineW||0, radius:o.radius||0, peerGroup:o.peerGroup||null,
+    geom:o.geom||null, bleed:!!o.bleed, decor:!!o.decor || !!o.bleed };
 }
 function Ic(id,name,x,y,size,color){ return { id:id, type:'icon', name:iconName(name), x:x, y:y, w:size, h:size, color:color }; }
 
@@ -154,6 +156,7 @@ function logoBox(logo){
 // Master furniture every slide carries: logo, footer, slide number.
 function decorate(scene, P, opts, index, total){
   opts = opts || {};
+  var footInk = scene.dark ? P.onAccent : P.soft;
   if(opts.logo){
     var b = logoBox(opts.logo);
     scene.objs.push({ id:'logo', type:'image', x:b.x, y:b.y, w:b.w, h:b.h, asset:'logo', furniture:true });
@@ -162,11 +165,11 @@ function decorate(scene, P, opts, index, total){
   var parts = [f.left, f.middle, f.right].filter(function(v){ return v && String(v).trim(); });
   if(parts.length){
     scene.objs.push(T('footer', G.FOOTER.x, G.FOOTER.y, G.FOOTER.w, G.FOOTER.h,
-      parts.join('     ·     '), 9, {color:P.soft, valign:'mid', placeholder:'ftr'}));
+      parts.join('     ·     '), 9, {color:footInk, valign:'mid', placeholder:'ftr'}));
   }
   if(opts.slideNumbers !== false){
     scene.objs.push(T('sldNum', G.SLDNUM.x, G.SLDNUM.y, G.SLDNUM.w, G.SLDNUM.h,
-      String(index+1).padStart(2,'0'), 9, {color:P.soft, align:'right', valign:'mid', placeholder:'sldNum'}));
+      String(index+1).padStart(2,'0'), 9, {color:footInk, align:'right', valign:'mid', placeholder:'sldNum'}));
   }
   return scene;
 }
@@ -403,7 +406,200 @@ var TEMPLATES = {
       });
       return { objs:objs };
     }
-  }
+  },
+
+  // ===== Demo-Muster: zeigen die gestalterische Bandbreite =====
+  divider: {
+    label:'Kapitel', layout:'Leer',
+    build:function(c,P,opts){
+      var objs = [
+        Bx('bleed', 0, 0, G.W, G.H, {fill:P.accent, bleed:true}),
+        T('num', colX(0), 1.15, colW(4), 2.0, c.number, 128, {bold:true, color:P.onAccent, leading:1.0}),
+        Bx('rule', colX(0), 3.45, 1.1, 0.06, {fill:P.onAccent}),
+        T('title', colX(0), 3.72, colW(8), 1.58, c.title, 44, {bold:true, color:P.onAccent, leading:1.15}),
+        T('text', colX(0), 5.48, colW(6), 0.9, c.text, 15, {color:P.onAccent, leading:1.4})
+      ];
+      return { objs:objs, dark:true };
+    }
+  },
+
+  quote: {
+    label:'Zitat', layout:'Leer',
+    build:function(c,P,opts){
+      var objs = [
+        T('mark', colX(0), 1.02, 1.2, 1.25, '“', 82, {bold:true, color:P.accent, leading:0.9}),
+        T('quote', colX(0), 2.35, colW(9), 2.5, c.quote, 32, {bold:true, color:P.ink, leading:1.3}),
+        Bx('rule', colX(0), 5.15, 0.9, 0.05, {fill:P.accent2}),
+        T('by', colX(0), 5.45, colW(7), 0.4, c.attribution, 14, {bold:true, color:P.ink}),
+        T('role', colX(0), 5.88, colW(7), 0.4, c.role, 12.5, {color:P.soft})
+      ];
+      return { objs:objs };
+    }
+  },
+
+  kpiHero: {
+    label:'Leitzahl', layout:'Nur Titel',
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
+      var h = G.CONTENT_BOTTOM - top;
+      objs.push(T('value', colX(0), top+0.1, colW(6), 2.0, c.value, 118, {bold:true, color:P.accent, leading:1.0}));
+      objs.push(T('unit', colX(0), top+2.25, colW(6), 0.45, c.unit, 19, {bold:true, color:P.ink}));
+      objs.push(T('label', colX(0), top+2.85, colW(5.5), 1.1, c.label, 14, {color:P.soft, leading:1.4}));
+      var stats = c.stats||[], n = stats.length||1;
+      var sx = colX(7), sw = colW(5), sh = (h-(n-1)*0.2)/n;
+      stats.forEach(function(s,i){
+        var y = top + i*(sh+0.2);
+        objs.push(Bx('s'+i, sx, y, sw, sh, {fill:P.surface, line:P.line, lineW:1, radius:0.11, peerGroup:'stat'}));
+        objs.push(T('sv'+i, sx+0.3, y+0.22, 2.0, 0.62, s.value, 30, {bold:true, color:P.accent2Dark}));
+        objs.push(T('sl'+i, sx+0.3, y+0.92, sw-0.6, sh-1.1, s.label, 12, {color:P.soft, leading:1.3}));
+      });
+      return { objs:objs };
+    }
+  },
+
+  barChart: {
+    label:'Diagramm', layout:'Nur Titel',
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
+      var series = c.series||[], cats = c.categories||[];
+      var plotX = colX(0), plotW = colW(12);
+      var labelBand = 0.42, legendBand = 0.5;
+      var plotTop = top + legendBand;
+      var baseY = G.CONTENT_BOTTOM - labelBand;
+      var plotH = baseY - plotTop - 0.42;               // Luft fuer die Wertlabels
+      var max = 0;
+      series.forEach(function(s){ (s.values||[]).forEach(function(v){ if(v>max) max=v; }); });
+      max = max || 1;
+      var tone = [P.accent, P.accent2];
+
+      // Legende: bei zwei Reihen Pflicht, Text traegt Text-Farbe, nicht die Reihenfarbe
+      var lx = plotX;
+      series.forEach(function(s,si){
+        objs.push(Bx('lg'+si, lx, top+0.08, 0.22, 0.22, {fill:tone[si%2], radius:0.04}));
+        objs.push(T('lgt'+si, lx+0.34, top+0.02, 1.9, 0.34, s.name, 11.5, {color:P.ink, valign:'mid'}));
+        lx += 2.5;
+      });
+
+      var slot = plotW / Math.max(cats.length,1);
+      var gap = 0.14, groupW = slot - 0.5, barW = (groupW - gap*(series.length-1)) / Math.max(series.length,1);
+      cats.forEach(function(cat,ci){
+        var gx = plotX + ci*slot + (slot-groupW)/2;
+        series.forEach(function(s,si){
+          var v = (s.values||[])[ci] || 0;
+          var bh = Math.max(0.06, plotH * (v/max));
+          var bx = gx + si*(barW+gap);
+          objs.push(Bx('b'+ci+'_'+si, bx, baseY-bh, barW, bh,
+            {fill:tone[si%2], geom:'round2SameRect', radius:0.05, decor:true}));
+          objs.push(T('v'+ci+'_'+si, bx, baseY-bh-0.36, barW, 0.32,
+            String(v), 11, {bold:true, color:P.ink, align:'center'}));
+        });
+        objs.push(T('c'+ci, plotX + ci*slot, baseY+0.08, slot, 0.3, cat, 11.5, {color:P.soft, align:'center'}));
+      });
+      objs.push(Bx('axis', plotX, baseY, plotW, 0.012, {fill:P.line, decor:true}));
+      return { objs:objs };
+    }
+  },
+
+  matrix: {
+    label:'Matrix', layout:'Nur Titel',
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
+      var axisPad = 0.5;
+      var mx = colX(0)+axisPad, my = top+0.42;
+      var mw = colW(12)-axisPad, mh = G.CONTENT_BOTTOM - my - axisPad;
+      var qw = (mw-0.16)/2, qh = (mh-0.16)/2;
+      var tones = ['default','accent2','accent','dark'];
+      (c.quadrants||[]).slice(0,4).forEach(function(q,i){
+        var col = i%2, row = Math.floor(i/2);
+        var x = mx + col*(qw+0.16), y = my + row*(qh+0.16);
+        var t = toneFill(tones[i], P);
+        objs.push(Bx('q'+i, x, y, qw, qh, {fill:t.bg, line:t.line, lineW:1, radius:0.11, peerGroup:'q'+row}));
+        objs.push(T('qh'+i, x+0.28, y+0.24, qw-0.56, 0.36, q.title, 15, {bold:true, color:t.ink}));
+        objs.push(T('qp'+i, x+0.28, y+0.68, qw-0.56, qh-0.92, q.text, 11.5,
+          {color:(tones[i]==='dark'?P.onAccent:P.soft), leading:1.3}));
+      });
+      objs.push(T('ay', colX(0), my-0.34, colW(5), 0.3, c.axisY, 10.5, {bold:true, color:P.soft}));
+      objs.push(T('ax', mx, G.CONTENT_BOTTOM-axisPad+0.14, mw, 0.3, c.axisX, 10.5, {bold:true, color:P.soft, align:'center'}));
+      return { objs:objs };
+    }
+  },
+
+  roadmap: {
+    label:'Roadmap', layout:'Nur Titel',
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
+      var cols = c.columns||[], rows = c.rows||[];
+      var laneW = colW(2.4), trackX = colX(0)+laneW+0.2;
+      var trackW = colX(12)+colW(0)*0 + (colW(12)) - laneW - 0.2;
+      trackW = colW(12) - laneW - 0.2;
+      var headH = 0.42, n = cols.length||1, cw = trackW/n;
+      cols.forEach(function(col,i){
+        objs.push(Bx('ch'+i, trackX+i*cw+0.04, top, cw-0.08, headH, {fill:P.surface, line:P.line, lineW:1, radius:0.08, peerGroup:'colh'}));
+        objs.push(T('cht'+i, trackX+i*cw+0.04, top, cw-0.08, headH, col, 11, {bold:true, color:P.soft, align:'center', valign:'mid'}));
+      });
+      var rowTop = top+headH+0.22, rn = rows.length||1;
+      var rh = (G.CONTENT_BOTTOM - rowTop - (rn-1)*0.16)/rn;
+      rows.forEach(function(r,ri){
+        var y = rowTop + ri*(rh+0.16);
+        objs.push(T('rl'+ri, colX(0), y, laneW, rh, r.lane, 12.5, {bold:true, color:P.ink, valign:'mid'}));
+        objs.push(Bx('rt'+ri, trackX, y+rh/2-0.01, trackW, 0.02, {fill:P.line, decor:true}));
+        (r.bars||[]).forEach(function(b,bi){
+          var from = Math.max(0, b.from||0), to = Math.min(n, b.to||n);
+          var bx = trackX + from*cw + 0.06, bw = Math.max(0.4, (to-from)*cw - 0.12);
+          var t = b.tone==='accent2' ? P.accent2Dark : (b.tone==='soft' ? P.surfaceAccent : P.accent);
+          var ink = b.tone==='soft' ? P.ink : P.onAccent;
+          var barH = Math.min(0.66, rh-0.24), by = y + (rh-barH)/2;
+          objs.push(Bx('bar'+ri+'_'+bi, bx, by, bw, barH, {fill:t, radius:barH/2, peerGroup:'bar'+ri}));
+          objs.push(T('bt'+ri+'_'+bi, bx+0.26, by, bw-0.52, barH, b.label, 11.5, {bold:true, color:ink, valign:'mid'}));
+        });
+      });
+      return { objs:objs };
+    }
+  },
+
+  table: {
+    label:'Tabelle', layout:'Nur Titel',
+    build:function(c,P,opts){
+      var objs = [], top = header(c,P,objs,opts);
+      var head = c.head||[], rows = c.rows||[];
+      var nCol = head.length||1;
+      var tw = colW(12), firstW = tw*0.34, restW = (tw-firstW)/Math.max(nCol-1,1);
+      function cellX(i){ return colX(0) + (i===0 ? 0 : firstW + (i-1)*restW); }
+      function cellW(i){ return i===0 ? firstW : restW; }
+      var headH = 0.5, rn = rows.length||1;
+      var rh = Math.min(0.72, (G.CONTENT_BOTTOM - top - headH - 0.1)/rn);
+      objs.push(Bx('thead', colX(0), top, tw, headH, {fill:P.accent, radius:0.08}));
+      head.forEach(function(h,i){
+        objs.push(T('th'+i, cellX(i)+0.22, top, cellW(i)-0.3, headH, h, 11.5,
+          {bold:true, color:P.onAccent, valign:'mid', align:(i===0?'left':'left')}));
+      });
+      rows.forEach(function(r,ri){
+        var y = top+headH+ri*rh;
+        if(ri%2===1) objs.push(Bx('rb'+ri, colX(0), y, tw, rh, {fill:P.surface, decor:true}));
+        objs.push(Bx('rl'+ri, colX(0), y+rh-0.008, tw, 0.008, {fill:P.line, decor:true}));
+        (r||[]).forEach(function(cell,ci){
+          objs.push(T('td'+ri+'_'+ci, cellX(ci)+0.22, y, cellW(ci)-0.3, rh, cell, 11.5,
+            {bold:(ci===0), color:(ci===0?P.ink:P.soft), valign:'mid', leading:1.25}));
+        });
+      });
+      return { objs:objs };
+    }
+  },
+
+  finale: {
+    label:'Abschluss', layout:'Leer',
+    build:function(c,P,opts){
+      var objs = [
+        Bx('bleed', 0, 0, G.W, G.H, {fill:P.ink, bleed:true}),
+        T('eyebrow', colX(0), 1.5, colW(6), 0.3, c.eyebrow, 11.5, {bold:true, color:P.accentLight}),
+        T('title', colX(0), 2.0, colW(8), 1.7, c.title, 46, {bold:true, color:P.onAccent, leading:1.15}),
+        T('text', colX(0), 4.0, colW(6), 0.9, c.text, 15, {color:P.onAccent, leading:1.4}),
+        Bx('cta', colX(0), 5.2, 4.6, 0.66, {fill:P.accent, radius:0.33}),
+        T('ctaT', colX(0)+0.32, 5.2, 4.6-0.64, 0.66, c.cta, 13, {bold:true, color:P.onAccent, valign:'mid'})
+      ];
+      return { objs:objs, dark:true };
+    }
+  },
 };
 var TPL_ORDER = ['cover','summary','statement','flow4','grid3','visionFactors','techGrid','layers','kpiMosaic'];
 
@@ -437,7 +633,7 @@ function computeGate(scene){
   var texts = objs.filter(function(o){ return o.type==='text'; });
 
   var worst = 0;
-  objs.filter(function(o){ return o.type!=='icon' && !o.placeholder && !o.furniture; }).forEach(function(o){
+  objs.filter(function(o){ return o.type!=='icon' && !o.placeholder && !o.furniture && !o.bleed; }).forEach(function(o){
     var over = Math.max(0, (o.x+o.w)-G.SAFE.right, G.SAFE.left-o.x, (o.y+o.h)-G.SAFE.bottom, G.SAFE.top-o.y);
     if(over>worst) worst = over;
   });
@@ -521,6 +717,11 @@ function xfrm(o){
   return '<a:xfrm><a:off x="'+emu(o.x)+'" y="'+emu(o.y)+'"/><a:ext cx="'+emu(Math.max(o.w,0.01))+'" cy="'+emu(Math.max(o.h,0.01))+'"/></a:xfrm>';
 }
 function geomFor(o){
+  if(o.geom === 'round2SameRect'){
+    var a = Math.round(Math.min(0.5, (o.radius||0.05)/Math.min(o.w,o.h))*100000);
+    return '<a:prstGeom prst="round2SameRect"><a:avLst>'
+      + '<a:gd name="adj1" fmla="val '+a+'"/><a:gd name="adj2" fmla="val 0"/></a:avLst></a:prstGeom>';
+  }
   if(o.radius && o.radius>0){
     var adj = Math.round(Math.min(0.5, o.radius/Math.min(o.w,o.h))*100000);
     return '<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val '+adj+'"/></a:avLst></a:prstGeom>';

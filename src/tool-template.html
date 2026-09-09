@@ -35,6 +35,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font)}
 .chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;border-radius:100px;padding:6px 13px;border:1px solid var(--ok-line);background:var(--ok-soft);color:var(--ok-ink);cursor:pointer}
 .chip.warn{border-color:var(--warn-line);background:var(--warn-soft);color:var(--warn)}
 .chip .d{width:7px;height:7px;border-radius:50%;background:currentColor}
+.deckSel{font-family:var(--font);font-size:12.5px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
 .btn{font-family:var(--font);font-size:13px;font-weight:700;background:var(--brand);color:#fff;border:0;border-radius:9px;padding:10px 17px;cursor:pointer}
 .btn:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
 
@@ -98,6 +99,7 @@ input[type=text]:focus{outline:2px solid var(--brand);outline-offset:1px}
       <div class="sub" id="deckSub">—</div>
     </div>
     <div class="grow"></div>
+    <select class="deckSel" id="deckSel" aria-label="Unterlage"></select>
     <button class="chip" id="gateChip" aria-expanded="false"><span class="d"></span><span id="gateText">Prüfe…</span></button>
     <button class="btn" id="exportBtn" disabled>PowerPoint exportieren</button>
   </div>
@@ -106,6 +108,7 @@ input[type=text]:focus{outline:2px solid var(--brand);outline-offset:1px}
     <nav class="nav" id="nav"></nav>
     <div>
       <div class="frame" id="frame"></div>
+      <div class="frame" id="probe" aria-hidden="true" style="position:absolute;left:-20000px;top:0;box-shadow:none"></div>
       <div class="stagefoot">
         <button class="navbtn" id="prevBtn">←</button>
         <button class="navbtn" id="nextBtn">→</button>
@@ -153,7 +156,10 @@ input[type=text]:focus{outline:2px solid var(--brand);outline-offset:1px}
 __ENGINE__
 </script>
 <script>
-var DECK_CONTENT = __DECK__;
+var DECKS = [
+  { name:'Management Pitch', file:'StoryCraft_Management_Pitch', slides: __DECK__ },
+  { name:'Demo · Gestaltung', file:'StoryCraft_Demo', slides: __DEMO__ }
+];
 var MASTER_B64 = "__MASTER_B64__";
 </script>
 <script>
@@ -162,7 +168,8 @@ var MASTER_B64 = "__MASTER_B64__";
   var E = window.StoryCraft, G = E.G;
   var THEME = E.DEFAULT_THEME;
   var masterData = null, masterLabel = '';
-  var deck = DECK_CONTENT;
+  var deckIndex = 0;
+  var deck = DECKS[deckIndex].slides;
   var opts = { logo:null, footer:{left:'',middle:'',right:''}, slideNumbers:true };
   var active = 0, scenes = [], warns = [];
 
@@ -198,8 +205,8 @@ var MASTER_B64 = "__MASTER_B64__";
   }
 
   // ---------- render ----------
-  function render(scene){
-    var frame = document.getElementById('frame');
+  function render(scene, target){
+    var frame = target || document.getElementById('frame');
     frame.innerHTML = '';
     scene.objs.forEach(function(o){
       var d = document.createElement('div');
@@ -229,7 +236,7 @@ var MASTER_B64 = "__MASTER_B64__";
       }
       frame.appendChild(d);
     });
-    if(document.getElementById('optGrid').checked) addGrid(frame);
+    if(!target && document.getElementById('optGrid').checked) addGrid(frame);
     frame.style.setProperty('--pxpi', (frame.clientWidth/G.W).toFixed(3));
   }
   function addGrid(frame){
@@ -312,6 +319,24 @@ var MASTER_B64 = "__MASTER_B64__";
     scenes = deck.map(function(_,i){ return sceneFor(i); });
     warns = scenes.map(function(s){ return E.computeGate(s).some(function(r){ return r.status==='warn'; }); });
     show(active);
+    measureAll();
+  }
+  // Textüberlauf lässt sich nur am gerenderten Text messen. Ohne diesen Durchlauf
+  // wäre nur die gerade sichtbare Folie geprüft und der Gesamtstatus zu optimistisch.
+  function measureAll(){
+    var probe = document.getElementById('probe');
+    var w = document.getElementById('frame').clientWidth;
+    if(!w) return;
+    probe.style.width = w+'px';
+    scenes.forEach(function(scene,i){
+      render(scene, probe);
+      var clipped = Array.prototype.filter.call(probe.querySelectorAll('[data-check="overflow"]'), function(el){
+        return el.scrollHeight>el.clientHeight+2 || el.scrollWidth>el.clientWidth+2;
+      });
+      if(clipped.length) warns[i] = true;
+    });
+    probe.innerHTML = '';
+    refreshStatus();
   }
   function show(i){
     active = Math.max(0, Math.min(deck.length-1, i));
@@ -327,6 +352,7 @@ var MASTER_B64 = "__MASTER_B64__";
     refreshStatus();
     checkOverflow();
     document.getElementById('stageNote').textContent = 'Folie '+(active+1)+' von '+deck.length;
+    document.getElementById('deckTitle').textContent = DECKS[deckIndex].name;
     document.getElementById('deckSub').textContent =
       deck.length+' Folien · '+(THEME.name||masterLabel||'Master')+' · Export 1:1 aus dieser Ansicht';
   }
@@ -362,7 +388,7 @@ var MASTER_B64 = "__MASTER_B64__";
         opts.logo ? { bytes:opts.logo.bytes, ext:opts.logo.ext } : null);
       var blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE',
         mimeType:'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
-      await deliver(blob, 'StoryCraft_Deck.pptx', el);
+      await deliver(blob, DECKS[deckIndex].file+'.pptx', el);
     }catch(err){
       el.textContent = 'Export fehlgeschlagen: '+(err && err.message ? err.message : err);
     }
@@ -431,6 +457,18 @@ var MASTER_B64 = "__MASTER_B64__";
     var p = document.getElementById('qaPanel');
     p.hidden = !p.hidden;
     this.setAttribute('aria-expanded', String(!p.hidden));
+  });
+  var deckSel = document.getElementById('deckSel');
+  DECKS.forEach(function(d,i){
+    var o = document.createElement('option'); o.value=String(i);
+    o.textContent = d.name+' ('+d.slides.length+')'; deckSel.appendChild(o);
+  });
+  deckSel.addEventListener('change', function(e){
+    deckIndex = parseInt(e.target.value,10);
+    deck = DECKS[deckIndex].slides;
+    active = 0;
+    buildNav();
+    rebuild();
   });
   document.getElementById('prevBtn').addEventListener('click', function(){ show(active-1); });
   document.getElementById('nextBtn').addEventListener('click', function(){ show(active+1); });

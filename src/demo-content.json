@@ -1,0 +1,97 @@
+[
+  {
+    "template": "divider",
+    "content": {
+      "number": "01",
+      "title": "Was dieses System\ngestalterisch kann",
+      "text": "Acht Muster, die zeigen, wie weit die Bandbreite reicht – alle aus demselben Raster und demselben Master."
+    }
+  },
+  {
+    "template": "kpiHero",
+    "content": {
+      "title": "Eine Zahl, die die Botschaft trägt",
+      "subtitle": "Wenn eine Kennzahl die Aussage ist, bekommt sie die Fläche – der Rest ordnet sich unter.",
+      "value": "43",
+      "unit": "Visual Patterns",
+      "label": "stehen als wiederverwendbare Bausteine bereit und lassen sich frei kombinieren.",
+      "stats": [
+        { "value": "18", "label": "native Kernformen für PowerPoint-kompatible Visualisierung" },
+        { "value": "8", "label": "Charttypen für quantitative Aussagen" },
+        { "value": "6", "label": "Tabellenmuster von RACI bis Entscheidungsmatrix" }
+      ]
+    }
+  },
+  {
+    "template": "barChart",
+    "content": {
+      "title": "Zahlen als native Formen, nicht als Screenshot",
+      "subtitle": "Jede Säule ist eine echte PowerPoint-Form – in der Datei nachträglich einfärbbar und verschiebbar.",
+      "categories": ["Q1", "Q2", "Q3", "Q4", "Q1+", "Q2+"],
+      "series": [
+        { "name": "Erstellte Unterlagen", "values": [12, 19, 27, 34, 41, 52] },
+        { "name": "Manuelle Nacharbeit (h)", "values": [28, 22, 16, 11, 7, 4] }
+      ]
+    }
+  },
+  {
+    "template": "matrix",
+    "content": {
+      "title": "Portfolio-Sicht in vier Feldern",
+      "subtitle": "Die klassische Management-Matrix – mit klarer Achsenbeschriftung statt bunter Blasen.",
+      "axisX": "AUFWAND  →",
+      "axisY": "←  WIRKUNG",
+      "quadrants": [
+        { "title": "Sofort umsetzen", "text": "Hohe Wirkung bei geringem Aufwand. Hier beginnt der Rollout." },
+        { "title": "Gezielt investieren", "text": "Hohe Wirkung, aber aufwendig. Braucht eine bewusste Entscheidung und Ressourcen." },
+        { "title": "Nebenbei mitnehmen", "text": "Kleine Verbesserungen, die ohne Projektaufsatz möglich sind." },
+        { "title": "Bewusst zurückstellen", "text": "Viel Aufwand, wenig Wirkung. Dokumentieren und später erneut prüfen." }
+      ]
+    }
+  },
+  {
+    "template": "roadmap",
+    "content": {
+      "title": "Roadmap über vier Quartale",
+      "subtitle": "Phasen, Zuständigkeiten und Übergaben in einer Zeile lesbar.",
+      "columns": ["Q1", "Q2", "Q3", "Q4"],
+      "rows": [
+        { "lane": "Fundament", "bars": [ { "from": 0, "to": 2, "label": "Master & Raster verankern", "tone": "accent" } ] },
+        { "lane": "Bausteine", "bars": [ { "from": 1, "to": 3, "label": "Muster-Bibliothek ausbauen", "tone": "accent2" } ] },
+        { "lane": "Rollout", "bars": [ { "from": 2, "to": 4, "label": "Teams anbinden und schulen", "tone": "soft" } ] }
+      ]
+    }
+  },
+  {
+    "template": "table",
+    "content": {
+      "title": "Entscheidungsvorlage als Tabelle",
+      "subtitle": "Vergleiche bleiben Text und Formen – in PowerPoint weiter editierbar, nicht eingefroren.",
+      "head": ["Kriterium", "Heute", "Mit StoryCraft", "Effekt"],
+      "rows": [
+        ["Zeit bis zur ersten Fassung", "mehrere Stunden", "Minuten", "deutlich schneller"],
+        ["Gestaltungsqualität", "je nach Ersteller", "durch Raster gesetzt", "konstant"],
+        ["Master-Treue", "manuell nachgezogen", "systemisch verankert", "keine Nacharbeit"],
+        ["Änderungen", "Folie neu bauen", "Inhalt ändern", "iterationsfähig"],
+        ["Prüfung vor Weitergabe", "Sichtprüfung", "automatisch geprüft", "belastbar"]
+      ]
+    }
+  },
+  {
+    "template": "quote",
+    "content": {
+      "quote": "Die Unterlage entsteht nicht mehr nach der Entscheidung –\nsie entsteht während wir sie treffen.",
+      "attribution": "Aus einem Pilotgespräch",
+      "role": "AI & Data Delivery Hub"
+    }
+  },
+  {
+    "template": "finale",
+    "content": {
+      "eyebrow": "NÄCHSTER SCHRITT",
+      "title": "Story im Chat.\nUnterlage auf Knopfdruck.",
+      "text": "Inhalt und Struktur entstehen im Dialog, das Raster übernimmt die Gestaltung, der Export bleibt mit dem Master verknüpft.",
+      "cta": "Deck als PowerPoint exportieren"
+    }
+  }
+]
